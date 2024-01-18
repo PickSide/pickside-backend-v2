@@ -49,7 +49,7 @@ func run() error {
 	v1.Post("/refresh-token", router.RefreshToken)
 	v1.Post("/register", router.Register)
 
-	log.Fatal(app.Listen(":3000"))
+	log.Fatal(app.Listen(":8080"))
 
 	return nil
 }

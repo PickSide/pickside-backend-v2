@@ -2,7 +2,9 @@ package common
 
 import (
 	"context"
+	"fmt"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -10,13 +12,25 @@ import (
 var db *mongo.Database
 
 func InitDB() error {
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017"))
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts := options.Client().ApplyURI("mongodb+srv://ah:123@cluster0.q2cu6xe.mongodb.net/?retryWrites=true&w=majority").SetServerAPIOptions(serverAPI)
 
+	client, err := mongo.Connect(context.TODO(), opts)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
-	db = client.Database("Cluster0")
+	defer func() {
+		if err = client.Disconnect(context.TODO()); err != nil {
+			panic(err)
+		}
+	}()
+
+	if err := client.Database("pickside").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
 	return nil
 }
