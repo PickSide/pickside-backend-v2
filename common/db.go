@@ -9,8 +9,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var db *mongo.Database
-
 func InitDB() error {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI("mongodb+srv://ah:123@cluster0.q2cu6xe.mongodb.net/?retryWrites=true&w=majority").SetServerAPIOptions(serverAPI)
@@ -33,8 +31,4 @@ func InitDB() error {
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
 	return nil
-}
-
-func CloseDB() error {
-	return db.Client().Disconnect(context.Background())
 }
