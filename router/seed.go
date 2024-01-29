@@ -8,6 +8,12 @@ import (
 	"me/pickside/db/queries"
 )
 
+type UserData struct {
+	FullName string
+	Email    string
+	Username string
+}
+
 func Seed(c *gin.Context, db *sql.DB) {
 	log.Println("Drop tables...")
 	_, err := db.Exec(queries.DROP_USER_TABLE)
@@ -25,16 +31,35 @@ func Seed(c *gin.Context, db *sql.DB) {
 		panic(err)
 	}
 
-	users := []User{
-		{FullName: "John Doe", Email: "john.doe@example.com", Password: string(hashPassword)},
-		{FullName: "Jane Smith", Email: "jane.smith@example.com", Password: string(hashPassword)},
-		// Add more users as needed
+	users_data := []UserData{
+		{FullName: "Tony Hakim", Email: "tonyown10@example.com", Username: "tony"},
+		{FullName: "Niloo Khastavan", Email: "niloo@example.com", Username: "niloo"},
+		{FullName: "Rafic Haddad", Email: "tonyown10@example.com", Username: "rafic"},
+		{FullName: "Ali Idrici", Email: "tonyown10@example.com", Username: "ali"},
+		{FullName: "Ian Piluganov", Email: "tonyown10@example.com", Username: "ian"},
+		{FullName: "Kevin Moniz", Email: "tonyown10@example.com", Username: "kevin"},
+	}
+
+	var users []User
+
+	for _, user := range users_data {
+		users = append(users, User{AccountType: DEFAULT, Avatar: "", Bio: "My bio", City: "Montreal", Password: string(hashPassword), EmailVerified: true, FullName: user.FullName, Email: user.Email, Username: user.Username})
 	}
 
 	for _, user := range users {
-		_, err := db.Exec(queries.INSERT_USER, user.FullName, user.Email)
+		_, err := db.Exec(queries.INSERT_USER,
+			user.AccountType,
+			user.Avatar,
+			user.Bio,
+			user.City,
+			user.Email,
+			user.EmailVerified,
+			user.FullName,
+			user.Password,
+			user.Username,
+		)
 		if err != nil {
-			return
+			panic(err)
 		}
 	}
 

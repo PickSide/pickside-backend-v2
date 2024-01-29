@@ -2,52 +2,87 @@ package router
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"me/pickside/db/queries"
 	"net/http"
+	"time"
+)
+
+type AccountType string
+type Permission string
+type Role string
+type Sexe string
+type Theme string
+
+const (
+	GOOGLE   AccountType = "google"
+	FACEBOOK AccountType = "facebook"
+	APPLE    AccountType = "apple"
+	DEFAULT  AccountType = "default"
+	GUEST    AccountType = "guest"
+
+	ACTIVITIES_VIEW       Permission = "activities-view"
+	ACTIVITIES_CREATE     Permission = "activities-create"
+	ACTIVITIES_DELETE     Permission = "activities-delete"
+	ACTIVITIES_REGISTER   Permission = "activities-register"
+	GROUP_CREATE          Permission = "group-create"
+	GROUP_DELETE          Permission = "group-delete"
+	GROUP_SEARCH          Permission = "group-search"
+	USERS_VIEW_ALL        Permission = "see-all-users"
+	USERS_VIEW_DETAIL     Permission = "see-detail-users"
+	SEND_MESSAGES         Permission = "send-messages"
+	NOTIFICATIONS_RECEIVE Permission = "notifications-receive"
+	GOOGLE_SEARCH         Permission = "google-search"
+	MAP_VIEW              Permission = "map-view"
+
+	ADMIN Role = "admin"
+	USER  Role = "user"
+
+	LIGHT Theme = "light"
+	DARK  Theme = "dark"
 )
 
 type UserSettings struct {
-	ID                    uint16
-	PreferredSport        string
-	PreferredLocale       string
-	PreferredTheme        string
-	PreferredRegion       string
-	AllowLocationTracking bool
-	ShowAge               bool
-	ShowEmail             bool
-	ShowPhone             bool
-	ShowGroups            bool
-	User                  User `gorm:"foreignKey:UserID"`
-	UserID                User
+	ID                    uint16 `json:"id"`
+	PreferredSport        string `json:"preferred_sport"`
+	PreferredLocale       string `json:"preferred_locale"`
+	PreferredTheme        string `json:"preferred_theme"`
+	PreferredRegion       string `json:"preferred_region"`
+	AllowLocationTracking bool   `json:"allow_location_tracking"`
+	ShowAge               bool   `json:"show_age"`
+	ShowEmail             bool   `json:"show_email"`
+	ShowPhone             bool   `json:"show_phone"`
+	ShowGroups            bool   `json:"show_groups"`
+	User                  User   `json:"user" gorm:"foreignKey:UserID"`
+	UserID                User   `json:"user_id"`
 }
 
 type User struct {
-	ID                  uint16 `json:"id"`
-	AccountType         string
-	Avatar              string
-	Bio                 string
-	City                string
-	Email               string `json:"email"`
-	EmailVerified       bool
-	FullName            string `json:"full_name"`
-	IsInactive          bool
-	InactiveDate        int
-	JoinDate            int64
-	LocaleRegion        string
-	MatchOrganizedCount int
-	MatchPlayedCount    int
-	Password            string
-	Permissions         string
-	Phone               string
-	UserSettingsID      int
-	Reliability         int
-	Role                string
-	Sexe                string
-	Timezone            int64
-	Username            string
+	ID                  uint16      `json:"id"`
+	AccountType         AccountType `json:"account_type"`
+	Avatar              string      `json:"avatar" default:"default_avatar.jpg"`
+	Bio                 string      `json:"bio" default:"My default bio"`
+	City                string      `json:"city" default:"Unknown"`
+	Email               string      `json:"email"`
+	EmailVerified       bool        `json:"email_verified" default:"false"`
+	FullName            string      `json:"full_name" default:"John Doe"`
+	IsInactive          bool        `json:"is_inactive" default:"false"`
+	InactiveDate        time.Time   `json:"inactive_date" default:"2000-01-01T00:00:00Z"`
+	JoinDate            time.Time   `json:"join_date"`
+	LocaleRegion        string      `json:"locale_region" default:"en_US"`
+	MatchOrganizedCount int         `json:"match_organized_count" default:"0"`
+	MatchPlayedCount    int         `json:"match_played_count" default:"0"`
+	Password            string      `json:"password" default:"default_password"`
+	Permissions         string      `json:"permissions" default:"read"`
+	Phone               string      `json:"phone" default:""`
+	Reliability         int         `json:"reliability" default:"50"`
+	Role                Role        `json:"role" default:"user"`
+	Sexe                string      `json:"sexe" default:"unknown"`
+	Timezone            string      `json:"timezone" default:"0"`
+	Username            string      `json:"username" default:"guest"`
 }
 
 func GetUsers(c *gin.Context, db *sql.DB) {
@@ -63,6 +98,7 @@ func GetUsers(c *gin.Context, db *sql.DB) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	values := make([]interface{}, len(columns))
 	for i := range values {
 		values[i] = new(interface{})
@@ -77,7 +113,12 @@ func GetUsers(c *gin.Context, db *sql.DB) {
 		users = append(users, user)
 	}
 
-	log.Println(users)
+	for _, user := range users {
+		fmt.Printf("ID: %d\n", user.ID)
+		fmt.Printf("Full Name: %s\n", user.FullName)
+		fmt.Printf("Email: %s\n", user.Email)
+		fmt.Printf("Password: %s\n", user.Password)
+	}
 	c.JSON(http.StatusOK, users)
 }
 
@@ -102,7 +143,7 @@ func CreateUser(c *gin.Context, db *sql.DB) {
 		panic(err)
 	}
 
-	rows, err := db.Query(queries.INSERT_USER, "tony", "tonyown10@gmail.com", user_req.Username, hashedPassword)
+	rows, err := db.Query(queries.INSERT_USER, "tonya", "tonyown11@gmail.com", user_req.Username, hashedPassword)
 	if err != nil {
 		panic(err)
 	}

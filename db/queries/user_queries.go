@@ -1,31 +1,5 @@
 package queries
 
-type AccountType string
-type Permission string
-type Role string
-
-const (
-	GOOGLE   AccountType = "google"
-	FACEBOOK AccountType = "facebook"
-	APPLE    AccountType = "apple"
-	DEFAULT  AccountType = "default"
-	GUEST    AccountType = "guest"
-
-	ACTIVITIES_VIEW       Permission = "activities-view"
-	ACTIVITIES_CREATE     Permission = "activities-create"
-	ACTIVITIES_DELETE     Permission = "activities-delete"
-	ACTIVITIES_REGISTER   Permission = "activities-register"
-	GROUP_CREATE          Permission = "group-create"
-	GROUP_DELETE          Permission = "group-delete"
-	GROUP_SEARCH          Permission = "group-search"
-	USERS_VIEW_ALL        Permission = "see-all-users"
-	USERS_VIEW_DETAIL     Permission = "see-detail-users"
-	SEND_MESSAGES         Permission = "send-messages"
-	NOTIFICATIONS_RECEIVE Permission = "notifications-receive"
-	GOOGLE_SEARCH         Permission = "google-search"
-	MAP_VIEW              Permission = "map-view"
-)
-
 const CREATE_USER_TABLE = `
 	CREATE TABLE IF NOT EXISTS users (
 		id INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,6 +29,6 @@ const CREATE_USER_TABLE = `
 `
 const DROP_USER_TABLE = "DROP TABLE IF EXISTS users"
 
-const INSERT_USER = "INSERT INTO users (full_name, email, password) VALUES (?, ?, ?, ?)"
+const INSERT_USER = "INSERT INTO users (account_type, avatar, bio, city, email, email_verified, full_name, password, username) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 const SELECT_ALL_FROM_USERS = "SELECT * FROM users"
