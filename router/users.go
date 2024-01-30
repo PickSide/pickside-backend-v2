@@ -12,7 +12,6 @@ import (
 )
 
 type AccountType string
-type Permission string
 type Role string
 type Sexe string
 type Theme string
@@ -24,25 +23,28 @@ const (
 	DEFAULT  AccountType = "default"
 	GUEST    AccountType = "guest"
 
-	ACTIVITIES_VIEW       Permission = "activities-view"
-	ACTIVITIES_CREATE     Permission = "activities-create"
-	ACTIVITIES_DELETE     Permission = "activities-delete"
-	ACTIVITIES_REGISTER   Permission = "activities-register"
-	GROUP_CREATE          Permission = "group-create"
-	GROUP_DELETE          Permission = "group-delete"
-	GROUP_SEARCH          Permission = "group-search"
-	USERS_VIEW_ALL        Permission = "see-all-users"
-	USERS_VIEW_DETAIL     Permission = "see-detail-users"
-	SEND_MESSAGES         Permission = "send-messages"
-	NOTIFICATIONS_RECEIVE Permission = "notifications-receive"
-	GOOGLE_SEARCH         Permission = "google-search"
-	MAP_VIEW              Permission = "map-view"
+	ACTIVITIES_VIEW        string = "activities-view"
+	ACTIVITIES_CREATE      string = "activities-create"
+	ACTIVITIES_DELETE      string = "activities-delete"
+	ACTIVITIES_REGISTER    string = "activities-register"
+	GROUP_CREATE           string = "group-create"
+	GROUP_DELETE           string = "group-delete"
+	GROUP_SEARCH           string = "group-search"
+	USERS_VIEW_ALL         string = "see-all-users"
+	USERS_VIEW_DETAIL      string = "see-detail-users"
+	SEND_MESSAGES          string = "send-messages"
+	NOTIFICATIONS_RECEIVE  string = "notifications-receive"
+	GOOGLE_LOCATION_SEARCH string = "google-location-search"
+	MAP_VIEW               string = "map-view"
 
 	ADMIN Role = "admin"
 	USER  Role = "user"
 
 	LIGHT Theme = "light"
 	DARK  Theme = "dark"
+
+	MALE   Sexe = "male"
+	FEMALE Sexe = "female"
 )
 
 type UserSettings struct {
@@ -61,32 +63,32 @@ type UserSettings struct {
 }
 
 type User struct {
-	ID                  uint16      `json:"id"`
-	AccountType         AccountType `json:"account_type"`
-	Avatar              string      `json:"avatar" default:"default_avatar.jpg"`
-	Bio                 string      `json:"bio" default:"My default bio"`
-	City                string      `json:"city" default:"Unknown"`
-	Email               string      `json:"email"`
-	EmailVerified       bool        `json:"email_verified" default:"false"`
-	FullName            string      `json:"full_name" default:"John Doe"`
-	IsInactive          bool        `json:"is_inactive" default:"false"`
-	InactiveDate        time.Time   `json:"inactive_date" default:"2000-01-01T00:00:00Z"`
-	JoinDate            time.Time   `json:"join_date"`
-	LocaleRegion        string      `json:"locale_region" default:"en_US"`
-	MatchOrganizedCount int         `json:"match_organized_count" default:"0"`
-	MatchPlayedCount    int         `json:"match_played_count" default:"0"`
-	Password            string      `json:"password" default:"default_password"`
-	Permissions         string      `json:"permissions" default:"read"`
-	Phone               string      `json:"phone" default:""`
-	Reliability         int         `json:"reliability" default:"50"`
-	Role                Role        `json:"role" default:"user"`
-	Sexe                string      `json:"sexe" default:"unknown"`
-	Timezone            string      `json:"timezone" default:"0"`
-	Username            string      `json:"username" default:"guest"`
+	ID                  uint16         `json:"id"`
+	AccountType         AccountType    `json:"account_type"`
+	Avatar              string         `json:"avatar" default:"default_avatar.jpg"`
+	Bio                 string         `json:"bio" default:"My default bio"`
+	City                string         `json:"city" default:"Unknown"`
+	Email               string         `json:"email"`
+	EmailVerified       bool           `json:"email_verified" default:"false"`
+	FullName            string         `json:"full_name" default:"John Doe"`
+	IsInactive          bool           `json:"is_inactive" default:"false"`
+	InactiveDate        time.Time      `json:"inactive_date" default:"2000-01-01T00:00:00Z"`
+	JoinDate            time.Time      `json:"join_date"`
+	LocaleRegion        string         `json:"locale_region" default:"en_US"`
+	MatchOrganizedCount int            `json:"match_organized_count" default:"0"`
+	MatchPlayedCount    int            `json:"match_played_count" default:"0"`
+	Password            string         `json:"password" default:"default_password"`
+	Permissions         []string       `json:"permissions" default:"read"`
+	Phone               string         `json:"phone" default:""`
+	Reliability         int            `json:"reliability" default:"50"`
+	Role                Role           `json:"role" default:"user"`
+	Sexe                Sexe           `json:"sexe" default:"unknown"`
+	Timezone            *time.Location `json:"timezone"`
+	Username            string         `json:"username" default:"guest"`
 }
 
 func GetUsers(c *gin.Context, db *sql.DB) {
-	rows, err := db.Query(queries.SELECT_ALL_FROM_USERS)
+	rows, err := db.Query(queries.SelectAllFromUsers)
 	if err != nil {
 		return
 	}
@@ -143,7 +145,7 @@ func CreateUser(c *gin.Context, db *sql.DB) {
 		panic(err)
 	}
 
-	rows, err := db.Query(queries.INSERT_USER, "tonya", "tonyown11@gmail.com", user_req.Username, hashedPassword)
+	rows, err := db.Query(queries.InsertUser, "tonya", "tonyown11@gmail.com", user_req.Username, hashedPassword)
 	if err != nil {
 		panic(err)
 	}

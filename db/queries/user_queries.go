@@ -1,6 +1,6 @@
 package queries
 
-const CREATE_USER_TABLE = `
+const CreateUserTables = `
 	CREATE TABLE IF NOT EXISTS users (
 		id INT AUTO_INCREMENT PRIMARY KEY,
 		account_type VARCHAR(255),
@@ -11,8 +11,8 @@ const CREATE_USER_TABLE = `
 		email_verified BOOLEAN,
 		full_name VARCHAR(255),
 		is_inactive BOOLEAN,
-		inactive_date DATE,
-		join_date DATE,
+		inactive_date DATETIME,
+		join_date DATETIME,
 		locale_region VARCHAR(255),
 		match_organized_count INT,
 		match_played_count INT,
@@ -25,10 +25,60 @@ const CREATE_USER_TABLE = `
 		sexe VARCHAR(255),
 		timezone VARCHAR(255),
 		username VARCHAR(255)
-	)
+	);
+
 `
-const DROP_USER_TABLE = "DROP TABLE IF EXISTS users"
 
-const INSERT_USER = "INSERT INTO users (account_type, avatar, bio, city, email, email_verified, full_name, password, username) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+const CreateUserSettingsTable = `
+	CREATE TABLE IF NOT EXISTS user_settings (
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		preferred_sport VARCHAR(255),
+		preferred_locale VARCHAR(255),
+		preferred_theme VARCHAR(255),
+		preferred_region VARCHAR(255),
+		allow_location_tracking BOOLEAN,
+		show_age BOOLEAN,
+		show_email BOOLEAN,
+		show_phone BOOLEAN,
+		show_groups BOOLEAN,
+		user_id INT,
+		INDEX user_id_idx (user_id)
+	);
+`
 
-const SELECT_ALL_FROM_USERS = "SELECT * FROM users"
+const AlterTableUserSettings = `
+
+`
+
+const DropUserTables = `
+	DROP TABLE IF EXISTS users;
+`
+
+const DropUserSettingsTable = `
+	DROP TABLE IF EXISTS user_settings;
+`
+
+const InsertUser = `
+	INSERT INTO users (
+		account_type, avatar, bio, city, email, email_verified, full_name, password, username,
+		is_inactive, inactive_date, join_date, locale_region, match_organized_count,
+		match_played_count, permissions, phone, reliability, role, sexe, timezone
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`
+
+const InsertUserSetting = `
+	INSERT INTO user_settings (
+		preferred_sport,
+		preferred_locale,
+		preferred_theme,
+		preferred_region,
+		allow_location_tracking,
+		show_age,
+		show_email,
+		show_phone,
+		show_groups,
+		user_id
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`
+
+const SelectAllFromUsers = "SELECT * FROM users"
