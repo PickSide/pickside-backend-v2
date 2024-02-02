@@ -2,7 +2,7 @@ package queries
 
 const CreateUserTables = `
 	CREATE TABLE IF NOT EXISTS users (
-		id INT AUTO_INCREMENT PRIMARY KEY,
+		id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 		account_type VARCHAR(255),
 		avatar VARCHAR(255),
 		bio VARCHAR(255),
@@ -11,7 +11,7 @@ const CreateUserTables = `
 		email_verified BOOLEAN,
 		full_name VARCHAR(255),
 		is_inactive BOOLEAN,
-		inactive_date DATETIME,
+		inactive_date DATETIME NULL,
 		join_date DATETIME,
 		locale_region VARCHAR(255),
 		match_organized_count INT,
@@ -19,7 +19,6 @@ const CreateUserTables = `
 		password VARCHAR(255),
 		permissions VARCHAR(255),
 		phone VARCHAR(255),
-		user_settings_id VARCHAR(255),
 		reliability FLOAT,
 		role VARCHAR(255),
 		sexe VARCHAR(255),
@@ -31,7 +30,7 @@ const CreateUserTables = `
 
 const CreateUserSettingsTable = `
 	CREATE TABLE IF NOT EXISTS user_settings (
-		id INT AUTO_INCREMENT PRIMARY KEY,
+		id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 		preferred_sport VARCHAR(255),
 		preferred_locale VARCHAR(255),
 		preferred_theme VARCHAR(255),
@@ -41,13 +40,9 @@ const CreateUserSettingsTable = `
 		show_email BOOLEAN,
 		show_phone BOOLEAN,
 		show_groups BOOLEAN,
-		user_id INT,
+		user_id BIGINT,
 		INDEX user_id_idx (user_id)
 	);
-`
-
-const AlterTableUserSettings = `
-
 `
 
 const DropUserTables = `
@@ -60,12 +55,11 @@ const DropUserSettingsTable = `
 
 const InsertUser = `
 	INSERT INTO users (
-		account_type, avatar, bio, city, email, email_verified, full_name, password, username,
-		is_inactive, inactive_date, join_date, locale_region, match_organized_count,
-		match_played_count, permissions, phone, reliability, role, sexe, timezone
+		account_type, avatar, bio, city, email, email_verified, full_name, is_inactive,
+		inactive_date, join_date, locale_region, match_organized_count, match_played_count,
+		password, permissions, phone, reliability, role, sexe, timezone, username
 	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
-
 const InsertUserSetting = `
 	INSERT INTO user_settings (
 		preferred_sport,
@@ -80,5 +74,54 @@ const InsertUserSetting = `
 		user_id
 	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
-
-const SelectAllFromUsers = "SELECT * FROM users"
+const SelectPasswordOnlyWhereUsernameEquals = "SELECT password FROM users WHERE username = ?"
+const SelectAllColumns = "SELECT * FROM users"
+const SelectAllColumnsExceptPasswordWhereUsernameEquals = `
+	SELECT 
+    	id,
+		account_type,
+		avatar,
+		bio,
+		city,
+		email,
+		email_verified,
+		full_name,
+ 		is_inactive,
+		inactive_date,
+		join_date,
+		locale_region,
+		match_organized_count,
+		match_played_count,
+		permissions,
+		phone,
+		reliability,
+		role,
+		sexe,
+		timezone,
+		username  
+	FROM users
+	WHERE username = ?`
+const SelectAllColumnsExceptPassword = `
+	SELECT 
+    	id,
+		account_type,
+		avatar,
+		bio,
+		city,
+		email,
+		email_verified,
+		full_name,
+ 		is_inactive,
+		inactive_date,
+		join_date,
+		locale_region,
+		match_organized_count,
+		match_played_count,
+		permissions,
+		phone,
+		reliability,
+		role,
+		sexe,
+		timezone,
+		username  
+	FROM users`
