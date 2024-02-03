@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"fmt"
 	"me/pickside/data"
 	"me/pickside/util"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type Me struct {
@@ -27,8 +29,8 @@ func HandleMe(g *gin.Context) {
 
 	user, err := data.Me(uint64(parsedToken.ID))
 	if err != nil {
+		fmt.Printf("parsedToken.Id %v", parsedToken.ID)
 		g.JSON(http.StatusInternalServerError, err)
-		g.Abort()
 	}
 
 	g.JSON(http.StatusOK, gin.H{"result": user})

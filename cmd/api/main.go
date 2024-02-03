@@ -25,7 +25,6 @@ func main() {
 	g.Use(cors.Default())
 	v1 := g.Group("/api/v1", middlewares.FromValidDomain())
 
-	v1.GET("/test-hello", handlers.HandleTestHello)
 	v1.GET("/me", middlewares.WithToken(), handlers.HandleMe)
 	v1.GET("/logout", handlers.HandleLogout)
 	v1.POST("/login", handlers.HandleLogin)
