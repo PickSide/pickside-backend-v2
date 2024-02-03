@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"errors"
-	"me/pickside/data"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"me/pickside/data"
+	"me/pickside/util"
+	"net/http"
 )
 
 type Me struct {
@@ -15,12 +15,28 @@ type Me struct {
 }
 
 func HandleMe(g *gin.Context) {
-	g.JSON(http.StatusOK, "OK")
+	refreshToken, err := g.Cookie("refreshToken")
+	if err != nil {
+		g.JSON(http.StatusUnauthorized, err)
+	}
+
+	parsedToken, err := util.GetTokenClaims(refreshToken)
+	if err != nil {
+		g.JSON(http.StatusUnauthorized, err)
+	}
+
+	user, err := data.Me(uint64(parsedToken.ID))
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err)
+		g.Abort()
+	}
+
+	g.JSON(http.StatusOK, gin.H{"result": user})
 }
 
 type AuthenticationRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 func HandleLogin(g *gin.Context) {
@@ -31,17 +47,81 @@ func HandleLogin(g *gin.Context) {
 		return
 	}
 
-	user, err, statusCode := data.Authenticate(authRequest.Username, authRequest.Password)
+	user, err := data.UserMatch(authRequest.Username, authRequest.Password)
 	if err != nil {
-		g.JSON(statusCode, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(http.StatusNotFound, err)
 		return
 	}
+
+	refreshToken, err := util.GenerateToken(float64(user.ID), user.Username, user.Email, user.EmailVerified, "refreshToken")
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	err = data.InsertNewToken(refreshToken, user.ID)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	accessToken, err := util.GenerateToken(float64(user.ID), user.Username, user.Email, user.EmailVerified, "accessToken")
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	err = data.InsertNewToken(accessToken, user.ID)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	g.SetCookie(
+		"refreshToken",
+		refreshToken,
+		3.154e10,
+		"/api/v1",
+		g.Request.Host,
+		util.IsSecure(),
+		true,
+	)
+
+	g.SetCookie(
+		"accessToken",
+		accessToken,
+		300000,
+		"/api/v1",
+		g.Request.Host,
+		util.IsSecure(),
+		true,
+	)
 
 	g.JSON(http.StatusOK, gin.H{
 		"result": user,
 	})
+}
+
+func HandleLogout(g *gin.Context) {
+	g.SetCookie(
+		"accessToken",
+		"",
+		-1,
+		"/api/v1",
+		g.Request.Host,
+		util.IsSecure(),
+		true,
+	)
+	g.SetCookie(
+		"refreshToken",
+		"",
+		-1,
+		"/api/v1",
+		g.Request.Host,
+		util.IsSecure(),
+		true,
+	)
+	g.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 }
 
 func HandleCreateMe(c *gin.Context) {

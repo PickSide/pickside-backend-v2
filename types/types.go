@@ -1,5 +1,7 @@
 package types
 
+import "github.com/golang-jwt/jwt"
+
 type AccountType string
 type Role string
 type Sexe string
@@ -35,3 +37,16 @@ const (
 	MALE   Sexe = "male"
 	FEMALE Sexe = "female"
 )
+
+type UserMetadata struct {
+	AccountType `json:"accountType"`
+}
+
+type JWTClaims struct {
+	jwt.Claims
+	//UserMetadata  UserMetadata `json:"user_metadata"`
+	ID            float64 `json:"sub"`
+	Email         string  `json:"email"`
+	Username      string  `json:"username"`
+	EmailVerified bool    `json:"email_verified"`
+}

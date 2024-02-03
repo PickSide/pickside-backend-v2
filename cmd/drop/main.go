@@ -18,6 +18,7 @@ func main() {
 	qs := []string{
 		queries.DropUserTables,
 		queries.DropUserSettingsTable,
+		queries.DropTokensTable,
 	}
 
 	for _, q := range qs {

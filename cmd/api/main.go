@@ -23,12 +23,13 @@ func main() {
 	}
 
 	g.Use(cors.Default())
+	v1 := g.Group("/api/v1", middlewares.FromValidDomain())
 
-	g.Use()
-
-	g.GET("/me", middlewares.WithToken(), handlers.HandleMe)
-	g.POST("/login", handlers.HandleLogin)
-	g.POST("/users", handlers.HandleCreateMe)
+	v1.GET("/test-hello", handlers.HandleTestHello)
+	v1.GET("/me", middlewares.WithToken(), handlers.HandleMe)
+	v1.GET("/logout", handlers.HandleLogout)
+	v1.POST("/login", handlers.HandleLogin)
+	v1.POST("/users", handlers.HandleCreateMe)
 
 	err := g.Run(os.Getenv("LISTEN_PORT"))
 

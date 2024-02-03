@@ -1,58 +1,66 @@
 package middlewares
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
-	"log"
-	"me/pickside/types"
 	"me/pickside/util"
 	"net/http"
 )
 
-type UserMetadata struct {
-	types.AccountType `json:"accountType"`
-}
-
-type JWTClaims struct {
-	jwt.Claims
-	UserMetadata UserMetadata `json:"user_metadata"`
-	ID           uuid.UUID    `json:"sub"`
-	Email        string       `json:"email"`
-}
-
 func WithToken() gin.HandlerFunc {
 	return func(g *gin.Context) {
-		cookies := g.Request.Cookies()
-
-		var refreshToken, accessToken *http.Cookie
-
-		for _, cookie := range cookies {
-			if cookie.Name == "refreshToken" {
-				refreshToken = cookie
-			}
-			if cookie.Name == "accessToken" {
-				accessToken = cookie
-			}
+		refreshToken, err := g.Cookie("refreshToken")
+		if err != nil {
+			g.JSON(http.StatusNotFound, "not found please login")
+			g.Abort()
+			return
 		}
 
-		if refreshToken == nil {
-			g.JSON(http.StatusUnauthorized, "Token not found, please login")
+		claims, err := util.GetTokenClaims(refreshToken)
+		if err != nil {
+			g.JSON(http.StatusForbidden, err)
+			g.Abort()
+			return
 		}
-		if refreshToken != nil && accessToken == nil {
-			token, err := util.VerifyToken(refreshToken.Value)
+
+		err = util.VerifyToken(refreshToken)
+		if err != nil {
+			g.JSON(http.StatusForbidden, err)
+			g.Abort()
+			return
+		}
+
+		accessToken, err := g.Cookie("accessToken")
+		if err != nil {
+			g.JSON(http.StatusForbidden, err)
+			g.Abort()
+			return
+		}
+
+		err = util.VerifyToken(accessToken)
+		if err != nil {
+			newAt, err := util.GenerateToken(
+				claims.ID,
+				claims.Username,
+				claims.Email,
+				claims.EmailVerified,
+				"accessToken",
+			)
 			if err != nil {
-				log.Fatal("error")
+				g.JSON(http.StatusInternalServerError, err)
+				g.Abort()
+				return
 			}
-			fmt.Printf("token %v", token)
+
+			g.SetCookie(
+				"accessToken",
+				newAt,
+				300000,
+				"/api/v1",
+				g.Request.Host,
+				util.IsSecure(),
+				true,
+			)
 		}
-		if refreshToken != nil && accessToken != nil {
-			token, err := util.VerifyToken(accessToken.Value)
-			if err != nil {
-				log.Fatal("error")
-			}
-			fmt.Printf("token %v", token)
-		}
+		return
 	}
 }

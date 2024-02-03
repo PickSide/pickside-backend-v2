@@ -39,6 +39,7 @@ func CreateTables() {
 	qs := []string{
 		queries.CreateUserTables,
 		queries.CreateUserSettingsTable,
+		queries.CreateTokensTable,
 	}
 
 	for _, q := range qs {
