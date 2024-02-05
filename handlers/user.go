@@ -22,12 +22,12 @@ func HandleMe(g *gin.Context) {
 		g.JSON(http.StatusUnauthorized, err)
 	}
 
-	parsedToken, err := util.GetTokenClaims(refreshToken)
+	parsedToken, err := util.ExtractClaims(refreshToken)
 	if err != nil {
 		g.JSON(http.StatusUnauthorized, err)
 	}
 
-	user, err := data.Me(uint64(parsedToken.ID))
+	user, err := data.GetMe(uint64(parsedToken.ID))
 	if err != nil {
 		fmt.Printf("parsedToken.Id %v", parsedToken.ID)
 		g.JSON(http.StatusInternalServerError, err)
@@ -55,7 +55,7 @@ func HandleLogin(g *gin.Context) {
 		return
 	}
 
-	refreshToken, err := util.GenerateToken(float64(user.ID), user.Username, user.Email, user.EmailVerified, "refreshToken")
+	refreshToken, err := util.GenerateRefresh(user.ID, user.Username, user.Email, user.EmailVerified)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, err)
 		return
@@ -67,7 +67,7 @@ func HandleLogin(g *gin.Context) {
 		return
 	}
 
-	accessToken, err := util.GenerateToken(float64(user.ID), user.Username, user.Email, user.EmailVerified, "accessToken")
+	accessToken, err := util.GenerateAccess(user.ID, user.Username, user.Email, user.EmailVerified)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, err)
 		return

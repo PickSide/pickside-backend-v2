@@ -2,7 +2,7 @@ run: build
 	@./bin/me-service-backend
 
 build:
-	@go build -o bin/me-service-backend cmd/api/main.go
+	@go build -o ./bin/me-service-backend cmd/api/main.go
 
 up:
 	@go run cmd/migrate/main.go up

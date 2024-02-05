@@ -1,11 +1,12 @@
 package data
 
 import (
-	"golang.org/x/crypto/bcrypt"
 	"me/pickside/db"
 	"me/pickside/db/queries"
 	"me/pickside/types"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserSettings struct {
@@ -110,7 +111,7 @@ func UserMatch(username string, password string) (*User, error) {
 	return &user, nil
 }
 
-func Me(id uint64) (*User, error) {
+func GetMe(id uint64) (*User, error) {
 	dbInstance := db.GetDB()
 
 	var user User

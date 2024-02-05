@@ -129,3 +129,11 @@ const SelectAllColumnsExceptPassword = `
 		timezone,
 		username  
 	FROM users`
+const SelectClaimsWhereUsernameEquals = `
+	SELECT 
+    	id,
+		email,
+		email_verified,
+		username  
+	FROM users
+	WHERE username = ?`
