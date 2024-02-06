@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
 
@@ -49,7 +50,7 @@ func HandleLogin(g *gin.Context) {
 		return
 	}
 
-	user, err := data.UserMatch(authRequest.Username, authRequest.Password)
+	user, err := data.MatchUser(authRequest.Username, authRequest.Password)
 	if err != nil {
 		g.JSON(http.StatusNotFound, err)
 		return
@@ -126,30 +127,52 @@ func HandleLogout(g *gin.Context) {
 	g.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 }
 
+type CreateUserRequest struct {
+	FullName      string `binding:"required"`
+	Username      string `binding:"required"`
+	Email         string `binding:"required" validate:"required,email"`
+	Password      string `binding:"required" validate:"required,min=8"`
+	Phone         string `binding:"required"`
+	Sexe          string `binding:"required" validate:"required,oneof=Male Female"`
+	AgreedToTerms bool   `binding:"required"`
+}
+
+func validateStruct(req CreateUserRequest) error {
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		var errorMessages []string
+		for _, err := range err.(validator.ValidationErrors) {
+			errorMessages = append(errorMessages, fmt.Sprintf("Field '%s' validation failed on tag '%s'", err.Field(), err.Tag()))
+		}
+		return fmt.Errorf("Validation errors:\n%s", errorMessages)
+	}
+	return nil
+}
+
 func HandleCreateMe(c *gin.Context) {
-	//	dbInstance := db.GetDB()
-	//	var user_req UserRequest
-	//
-	//	if err := c.ShouldBindJSON(&user_req); err != nil {
-	//		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	//		return
-	//	}
-	//
-	//	log.Println(user_req.Username)
-	//	log.Println(user_req.Password)
-	//
-	//	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user_req.Password), 10)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//
-	//	rows, err := dbInstance.Query(queries.InsertUser, "tonya", "tonyown11@gmail.com", user_req.Username, hashedPassword)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//
-	//	defer rows.Close()
-	//
-	//	c.JSON(http.StatusCreated, user_req)
-	//
+	var user_req CreateUserRequest
+
+	if err := c.ShouldBindJSON(&user_req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := validateStruct(user_req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	data.InsertUser(
+		user_req.FullName,
+		user_req.Email,
+		user_req.Username,
+		user_req.Password,
+		user_req.Phone,
+		user_req.Sexe,
+		user_req.AgreedToTerms,
+	)
+
+	c.JSON(http.StatusCreated, "user_req")
+
 }

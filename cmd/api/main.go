@@ -28,6 +28,7 @@ func main() {
 
 	v1.GET("/test", middlewares.WithToken(), handlers.TestAccessToken)
 	v1.GET("/me", middlewares.WithToken(), handlers.HandleMe)
+	v1.GET("/me-settings", middlewares.WithToken(), handlers.HandleMeSettings)
 	v1.GET("/logout", handlers.HandleLogout)
 	v1.POST("/login", handlers.HandleLogin)
 	v1.POST("/users", handlers.HandleCreateMe)

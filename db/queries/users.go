@@ -53,7 +53,11 @@ const InsertUserSetting = `
 		user_id
 	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
-const SelectPasswordOnlyWhereUsernameEquals = "SELECT password FROM users WHERE username = ?"
+const SelectPasswordOnlyWhereUsernameEquals = `
+	SELECT password 
+	FROM users 
+	WHERE username = ?
+`
 const SelectAllColumnsExceptPasswordWhereIDEquals = `
 	SELECT 
     	id,

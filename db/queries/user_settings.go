@@ -19,3 +19,7 @@ const CreateUserSettingsTable = `
 const DropUserSettingsTable = `
 	DROP TABLE IF EXISTS user_settings;
 `
+const SelectAllUserSettingsWhereUserIDEquals = `
+	SELECT * FROM user_settings
+	WHERE user_id = ?
+`

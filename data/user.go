@@ -9,21 +9,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserSettings struct {
-	ID                    uint64 `json:"id"`
-	PreferredSport        string `json:"preferred_sport"`
-	PreferredLocale       string `json:"preferred_locale"`
-	PreferredTheme        string `json:"preferred_theme"`
-	PreferredRegion       string `json:"preferred_region"`
-	AllowLocationTracking bool   `json:"allow_location_tracking"`
-	ShowAge               bool   `json:"show_age"`
-	ShowEmail             bool   `json:"show_email"`
-	ShowPhone             bool   `json:"show_phone"`
-	ShowGroups            bool   `json:"show_groups"`
-	User                  User   `json:"user" gorm:"foreignKey:UserID"`
-	UserID                User   `json:"user_id"`
-}
-
 type User struct {
 	ID                  uint64            `json:"id"`
 	AccountType         types.AccountType `json:"account_type"`
@@ -47,68 +32,57 @@ type User struct {
 	Sexe                types.Sexe
 	Timezone            string
 	Username            string
+	UserSettings        UserSettings `json:"settings" gorm:"foreignKey:UserID"`
 }
 
-func UserMatch(username string, password string) (*User, error) {
+func MatchUser(username string, password string) (*User, error) {
 	dbInstance := db.GetDB()
-
-	var user User
 
 	row, err := dbInstance.Query(queries.SelectPasswordOnlyWhereUsernameEquals, username)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	for row.Next() {
-		var user User
-		err := row.Scan(&user.Password)
+		var hashedPwd string
+		err := row.Scan(&hashedPwd)
 		if err != nil {
 			return nil, err
 		}
 
-		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	row, err = dbInstance.Query(queries.SelectAllColumnsExceptPasswordWhereUsernameEquals, username)
-	if err != nil {
-		return nil, nil
-	}
-
-	for row.Next() {
-		fields := []interface{}{
-			&user.ID,
-			&user.AccountType,
-			&user.Avatar,
-			&user.Bio,
-			&user.City,
-			&user.Email,
-			&user.EmailVerified,
-			&user.FullName,
-			&user.IsInactive,
-			&user.InactiveDate,
-			&user.JoinDate,
-			&user.LocaleRegion,
-			&user.MatchOrganizedCount,
-			&user.MatchPlayedCount,
-			&user.Permissions,
-			&user.Phone,
-			&user.Reliability,
-			&user.Role,
-			&user.Sexe,
-			&user.Timezone,
-			&user.Username,
-		}
-
-		err := row.Scan(fields...)
+		err = bcrypt.CompareHashAndPassword([]byte(hashedPwd), []byte(password))
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return &user, nil
+	var user User
+
+	err = dbInstance.QueryRow(queries.SelectAllColumnsExceptPasswordWhereUsernameEquals, username).Scan(
+		&user.ID,
+		&user.AccountType,
+		&user.Avatar,
+		&user.Bio,
+		&user.City,
+		&user.Email,
+		&user.EmailVerified,
+		&user.FullName,
+		&user.IsInactive,
+		&user.InactiveDate,
+		&user.JoinDate,
+		&user.LocaleRegion,
+		&user.MatchOrganizedCount,
+		&user.MatchPlayedCount,
+		&user.Permissions,
+		&user.Phone,
+		&user.Reliability,
+		&user.Role,
+		&user.Sexe,
+		&user.Timezone,
+		&user.Username,
+	)
+
+	return &user, err
 }
 
 func GetMe(id uint64) (*User, error) {
@@ -139,9 +113,19 @@ func GetMe(id uint64) (*User, error) {
 		&user.Timezone,
 		&user.Username,
 	)
+
+	return &user, err
+}
+
+func InsertUser(fullName string, username string, email string, pwd string, phone string, sexe string, agreedToTerms bool) error {
+	dbInstance := db.GetDB()
+
+	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(pwd), 10)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &user, nil
+	_, err = dbInstance.Query(queries.InsertUser, fullName, username, email, hashedPwd, phone, sexe, agreedToTerms)
+
+	return err
 }
