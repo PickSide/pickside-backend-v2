@@ -1,21 +1,21 @@
 package data
 
 import (
-	"me/pickside/db"
-	"me/pickside/db/queries"
+	"pickside/service/db"
+	"pickside/service/db/queries"
 )
 
 type UserSettings struct {
 	ID                    uint64 `json:"-"`
-	PreferredSport        string `json:"preferred_sport"`
-	PreferredLocale       string `json:"preferred_locale"`
-	PreferredTheme        string `json:"preferred_theme"`
-	PreferredRegion       string `json:"preferred_region"`
-	AllowLocationTracking bool   `json:"allow_location_tracking"`
-	ShowAge               bool   `json:"show_age"`
-	ShowEmail             bool   `json:"show_email"`
-	ShowPhone             bool   `json:"show_phone"`
-	ShowGroups            bool   `json:"show_groups"`
+	PreferredSport        string `json:"preferredSport"`
+	PreferredLocale       string `json:"preferredLocale"`
+	PreferredTheme        string `json:"preferredTheme"`
+	PreferredRegion       string `json:"preferredRegion"`
+	AllowLocationTracking bool   `json:"allowLocationTracking"`
+	ShowAge               bool   `json:"showAge"`
+	ShowEmail             bool   `json:"showEmail"`
+	ShowPhone             bool   `json:"showPhone"`
+	ShowGroups            bool   `json:"showGroups"`
 }
 
 func GetMeSettings(userID uint64) (*UserSettings, error) {

@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"me/pickside/util"
 	"net/http"
+	"pickside/service/util"
 	"time"
 
 	"github.com/gin-gonic/gin"

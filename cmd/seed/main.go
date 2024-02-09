@@ -1,14 +1,15 @@
 package main
 
 import (
-	"golang.org/x/crypto/bcrypt"
 	"log"
-	"me/pickside/data"
-	"me/pickside/db"
-	"me/pickside/db/queries"
-	"me/pickside/types"
+	"pickside/service/data"
+	"pickside/service/db"
+	"pickside/service/db/queries"
+	"pickside/service/types"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserData struct {
@@ -37,9 +38,21 @@ func CreateTables() {
 	log.Println("Creating tables...")
 
 	qs := []string{
-		queries.CreateUserTables,
-		queries.CreateUserSettingsTable,
+		queries.CreateActivityTable,
+		queries.CreateActivityUserTable,
+		queries.CreateChatroomParticipantsTable,
+		queries.CreateChatroomTable,
+		queries.CreateGameModesTable,
+		queries.CreateGroupMembersTable,
+		queries.CreateGroupTable,
+		queries.CreateLocaleTable,
+		queries.CreateMessageTable,
+		queries.CreateNotificationTable,
+		queries.CreateSportGameModesTable,
+		queries.CreateSportTable,
 		queries.CreateTokensTable,
+		queries.CreateUserSettingsTable,
+		queries.CreateUserTables,
 	}
 
 	for _, q := range qs {
@@ -52,6 +65,22 @@ func CreateTables() {
 
 func PopulateTables() {
 	log.Println("Seeding table...")
+
+	localesData := []data.Locale{
+		{Name: "english", FlagCode: "en"},
+		{Name: "français", FlagCode: "fr"},
+	}
+
+	for _, locale := range localesData {
+		_, err := db.GetDB().Query(queries.InsertIntoLocale,
+			locale.Name,
+			locale.FlagCode,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte("123"), 10)
 	if err != nil {
 		panic(err)
@@ -137,7 +166,34 @@ func PopulateTables() {
 			true,       // show_email
 			false,      // show_phone,
 			false,      // show_groups,
-			i,          // user_id
+			i,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+	activitiesData := []data.Activity{
+		{Address: "123 rue du 33", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 11, Price: 0, Rules: "No tackles", OrganizerID: 1, Time: time.Now().Format("15:04:05"), Title: "Activity A", SportID: 1},
+		{Address: "123 rue du 34", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 22, Price: 5, Rules: "No tackles", OrganizerID: 2, Time: time.Now().Format("15:04:05"), Title: "Activity B", SportID: 1},
+		{Address: "123 rue du 35", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 22, Price: 10, Rules: "No tackles", OrganizerID: 3, Time: time.Now().Format("15:04:05"), Title: "Activity C", SportID: 1},
+		{Address: "123 rue du 36", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 22, Price: 0, Rules: "No tackles", OrganizerID: 4, Time: time.Now().Format("15:04:05"), Title: "Activity D", SportID: 1},
+		{Address: "123 rue du 37", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 22, Price: 0, Rules: "No tackles", OrganizerID: 5, Time: time.Now().Format("15:04:05"), Title: "Activity E", SportID: 1},
+		{Address: "123 rue du 38", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 22, Price: 0, Rules: "No tackles", OrganizerID: 1, Time: time.Now().Format("15:04:05"), Title: "Activity F", SportID: 1},
+	}
+
+	for _, activity := range activitiesData {
+		_, err := db.GetDB().Query(queries.InsertActivity,
+			activity.Address,
+			activity.Date,
+			activity.Description,
+			activity.IsPrivate,
+			activity.MaxPlayers,
+			activity.Price,
+			activity.Rules,
+			activity.OrganizerID,
+			activity.Time,
+			activity.Title,
+			activity.SportID,
 		)
 		if err != nil {
 			panic(err)

@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"me/pickside/data"
-	"me/pickside/util"
 	"net/http"
+	"pickside/service/data"
+	"pickside/service/util"
 
 	"github.com/gin-gonic/gin"
 )

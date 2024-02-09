@@ -1,8 +1,8 @@
 run: build
-	@./bin/me-service-backend
+	@./bin/pickside-service
 
 build:
-	@go build -o ./bin/me-service-backend cmd/api/main.go
+	@go build -o ./bin/pickside-service cmd/api/main.go
 
 up:
 	@go run cmd/migrate/main.go up

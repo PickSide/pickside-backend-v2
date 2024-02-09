@@ -1,15 +1,15 @@
 package data
 
 import (
-	"me/pickside/db"
-	"me/pickside/db/queries"
+	"pickside/service/db"
+	"pickside/service/db/queries"
 )
 
 type Token struct {
 	ID            uint64 `json:"id"`
 	Value         string
-	IsBlackListed bool   `json:"is_black_listed"`
-	AssociatedId  uint64 `json:"associated_id"`
+	IsBlackListed bool   `json:"isBlackListed"`
+	AssociatedId  uint64 `json:"associatedId"`
 }
 
 func InsertNewToken(value string, userID uint64) error {

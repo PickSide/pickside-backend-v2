@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"me/pickside/db"
-	"me/pickside/db/queries"
+	"pickside/service/db"
+	"pickside/service/db/queries"
 )
 
 func main() {
@@ -16,9 +16,21 @@ func main() {
 	defer db.CloseDB()
 
 	qs := []string{
-		queries.DropUserTables,
-		queries.DropUserSettingsTable,
+		queries.DropActivityTable,
+		queries.DropActivityUserTable,
+		queries.DropChatroomParticipantsTable,
+		queries.DropChatroomTable,
+		queries.DropGameModesTable,
+		queries.DropGroupMembersTable,
+		queries.DropGroupTable,
+		queries.DropLocaleTable,
+		queries.DropMessageTable,
+		queries.DropNotificationTable,
+		queries.DropSportGameModesTable,
+		queries.DropSportTable,
 		queries.DropTokensTable,
+		queries.DropUserSettingsTable,
+		queries.DropUserTables,
 	}
 
 	for _, q := range qs {

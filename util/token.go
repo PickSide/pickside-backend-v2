@@ -2,8 +2,8 @@ package util
 
 import (
 	"errors"
-	"me/pickside/types"
 	"os"
+	"pickside/service/types"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"

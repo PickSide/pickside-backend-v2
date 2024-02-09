@@ -3,9 +3,9 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"me/pickside/data"
-	"me/pickside/util"
 	"net/http"
+	"pickside/service/data"
+	"pickside/service/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -149,17 +149,17 @@ func validateStruct(req CreateUserRequest) error {
 	return nil
 }
 
-func HandleCreateMe(c *gin.Context) {
+func HandleCreateMe(g *gin.Context) {
 	var user_req CreateUserRequest
 
-	if err := c.ShouldBindJSON(&user_req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := g.ShouldBindJSON(&user_req); err != nil {
+		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	err := validateStruct(user_req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -173,6 +173,6 @@ func HandleCreateMe(c *gin.Context) {
 		user_req.AgreedToTerms,
 	)
 
-	c.JSON(http.StatusCreated, "user_req")
+	g.JSON(http.StatusCreated, "user_req")
 
 }

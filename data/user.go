@@ -1,9 +1,9 @@
 package data
 
 import (
-	"me/pickside/db"
-	"me/pickside/db/queries"
-	"me/pickside/types"
+	"pickside/service/db"
+	"pickside/service/db/queries"
+	"pickside/service/types"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -11,19 +11,19 @@ import (
 
 type User struct {
 	ID                  uint64            `json:"id"`
-	AccountType         types.AccountType `json:"account_type"`
+	AccountType         types.AccountType `json:"accountType"`
 	Avatar              string
 	Bio                 string
 	City                string
 	Email               string
-	EmailVerified       bool       `json:"email_verified"`
-	FullName            string     `json:"full_name"`
-	IsInactive          bool       `json:"is_inactive"`
-	InactiveDate        *time.Time `json:"inactive_date"`
-	JoinDate            time.Time  `json:"join_date"`
-	LocaleRegion        string     `json:"locale_region"`
-	MatchOrganizedCount int        `json:"match_organized_count"`
-	MatchPlayedCount    int        `json:"match_played_count"`
+	EmailVerified       bool       `json:"emailVerified"`
+	FullName            string     `json:"fullName"`
+	IsInactive          bool       `json:"isInactive"`
+	InactiveDate        *time.Time `json:"inactiveDate"`
+	JoinDate            time.Time  `json:"joinDate"`
+	LocaleRegion        string     `json:"localeRegion"`
+	MatchOrganizedCount int        `json:"matchOrganizedCount"`
+	MatchPlayedCount    int        `json:"matchPlayedCount"`
 	Password            string
 	Permissions         string
 	Phone               string
@@ -125,7 +125,15 @@ func InsertUser(fullName string, username string, email string, pwd string, phon
 		return err
 	}
 
-	_, err = dbInstance.Query(queries.InsertUser, fullName, username, email, hashedPwd, phone, sexe, agreedToTerms)
+	_, err = dbInstance.Query(queries.InsertUser,
+		fullName,
+		username,
+		email,
+		hashedPwd,
+		phone,
+		sexe,
+		agreedToTerms,
+	)
 
 	return err
 }

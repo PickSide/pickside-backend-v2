@@ -3,7 +3,7 @@ package queries
 const CreateUserTables = `
 	CREATE TABLE IF NOT EXISTS users (
 		id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-		account_type VARCHAR(255),
+		account_type ENUM('google', 'facebook', 'apple', 'default', 'guest'),
 		avatar VARCHAR(255),
 		bio VARCHAR(255),
 		city VARCHAR(255),
@@ -20,18 +20,16 @@ const CreateUserTables = `
 		permissions VARCHAR(255),
 		phone VARCHAR(255),
 		reliability FLOAT,
-		role VARCHAR(255),
+		role ENUM('admin', 'user'),
 		sexe VARCHAR(255),
 		timezone VARCHAR(255),
 		username VARCHAR(255)
 	);
 
 `
-
 const DropUserTables = `
 	DROP TABLE IF EXISTS users;
 `
-
 const InsertUser = `
 	INSERT INTO users (
 		account_type, avatar, bio, city, email, email_verified, full_name, is_inactive,
@@ -108,7 +106,8 @@ const SelectAllColumnsExceptPasswordWhereUsernameEquals = `
 		timezone,
 		username  
 	FROM users
-	WHERE username = ?`
+	WHERE username = ?
+`
 const SelectAllColumnsExceptPassword = `
 	SELECT 
     	id,
@@ -132,7 +131,8 @@ const SelectAllColumnsExceptPassword = `
 		sexe,
 		timezone,
 		username  
-	FROM users`
+	FROM users
+`
 const SelectClaimsWhereUsernameEquals = `
 	SELECT 
     	id,
@@ -140,4 +140,5 @@ const SelectClaimsWhereUsernameEquals = `
 		email_verified,
 		username  
 	FROM users
-	WHERE username = ?`
+	WHERE username = ?
+`
