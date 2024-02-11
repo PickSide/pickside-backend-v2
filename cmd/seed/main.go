@@ -72,10 +72,7 @@ func PopulateTables() {
 	}
 
 	for _, locale := range localesData {
-		_, err := db.GetDB().Query(queries.InsertIntoLocale,
-			locale.Name,
-			locale.FlagCode,
-		)
+		_, err := db.GetDB().Query(queries.InsertIntoLocale, locale.Name, locale.FlagCode)
 		if err != nil {
 			panic(err)
 		}
@@ -89,10 +86,42 @@ func PopulateTables() {
 	}
 
 	for _, sport := range sportsData {
-		_, err := db.GetDB().Query(queries.InsertIntoSport,
-			sport.Name,
-			sport.FeatureAvailable,
-		)
+		_, err := db.GetDB().Query(queries.InsertIntoSport, sport.Name, sport.FeatureAvailable)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	gameModesData := []data.GameMode{
+		{Name: "1v1"},
+		{Name: "5v5"},
+		{Name: "7v7"},
+		{Name: "8v8"},
+		{Name: "11v11"},
+	}
+
+	for _, gameMode := range gameModesData {
+		_, err := db.GetDB().Query(queries.InsertIntoGameMode, gameMode.Name)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	sportGameModesData := []struct {
+		GameModeID uint64
+		SportID    uint64
+	}{
+		{GameModeID: 1, SportID: 1}, // soccer
+		{GameModeID: 2, SportID: 1}, // soccer
+		{GameModeID: 3, SportID: 1}, // soccer
+		{GameModeID: 4, SportID: 1}, // soccer
+
+		{GameModeID: 1, SportID: 2}, // bball
+		{GameModeID: 2, SportID: 2}, // bball
+	}
+
+	for _, sportGameMode := range sportGameModesData {
+		_, err := db.GetDB().Query(queries.InsertIntoSportGameMode, sportGameMode.GameModeID, sportGameMode.SportID)
 		if err != nil {
 			panic(err)
 		}

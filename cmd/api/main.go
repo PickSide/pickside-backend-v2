@@ -24,7 +24,7 @@ func main() {
 	}
 
 	g.Use(cors.Default())
-	v1 := g.Group("/api/v1", middlewares.FromValidDomain())
+	v1 := g.Group("/api/v2", middlewares.FromValidDomain())
 
 	//activities
 	v1.GET("/activities", handlers.HandleGetAllActivities)

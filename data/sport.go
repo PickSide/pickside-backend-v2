@@ -9,6 +9,7 @@ type Sport struct {
 	ID               uint64 `json:"id"`
 	Name             string `json:"name"`
 	FeatureAvailable bool   `json:"featureAvailable"`
+	GameMode         string `json:"gameMode"`
 }
 
 func AllSports() (*[]Sport, error) {
@@ -29,6 +30,7 @@ func AllSports() (*[]Sport, error) {
 			&sport.ID,
 			&sport.Name,
 			&sport.FeatureAvailable,
+			&sport.GameMode,
 		)
 		if err != nil {
 			return nil, err
