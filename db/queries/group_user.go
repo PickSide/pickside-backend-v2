@@ -1,7 +1,7 @@
 package queries
 
-const CreateGroupMembersTable = `
-    CREATE TABLE IF NOT EXISTS group_members (
+const CreateGroupUsersTable = `
+    CREATE TABLE IF NOT EXISTS group_users (
         group_id BIGINT UNSIGNED,
         user_id BIGINT UNSIGNED,
         PRIMARY KEY (group_id, user_id),
@@ -9,28 +9,28 @@ const CreateGroupMembersTable = `
         INDEX user_id_idx (user_id)
     )
 `
-const SelectAllFromGroupMembersByGroupId = `
+const SelectAllFromGroupUsersByGroupId = `
     SELECT * 
-    FROM group_members
+    FROM group_users
     WHERE group_id = ?
 `
-const SelectAllFromGroupMembersByUserId = `
+const SelectAllFromGroupUsersByUserId = `
     SELECT * 
-    FROM group_members
+    FROM group_users
     WHERE user_id = ?
 `
-const InsertIntoGroupMembers = `
-    INSERT INTO group_members (group_id, user_id)
+const InsertIntoGroupUsers = `
+    INSERT INTO group_users (group_id, user_id)
     VALUES (?, ?)
 `
-const DeleteFromGroupMembersByGroupId = `
-    DELETE FROM group_members
+const DeleteFromGroupUsersByGroupId = `
+    DELETE FROM group_users
     WHERE group_id = ?
 `
-const DeleteFromGroupMembersByUserId = `
-    DELETE FROM group_members
+const DeleteFromGroupUsersByUserId = `
+    DELETE FROM group_users
     WHERE user_id = ?
 `
-const DropGroupMembersTable = `
-    DROP TABLE IF EXISTS group_members
+const DropGroupUsersTable = `
+    DROP TABLE IF EXISTS group_users
 `

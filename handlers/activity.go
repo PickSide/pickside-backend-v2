@@ -31,7 +31,7 @@ type CreateActivityRequest struct {
 	Time        string  `json:"time" binding:"required"`
 	Title       string  `json:"title" binding:"required"`
 	IsPrivate   bool    `json:"isPrivate"`
-	SportID     int64   `json:"sportId" binding:"required"`
+	SportID     uint64  `json:"sportId" binding:"required"`
 }
 
 func HandleCreateActivity(g *gin.Context) {

@@ -10,7 +10,6 @@ const CreateLocaleTable = `
 const SelectAllFromLocales = `
     SELECT * 
     FROM locales
-    WHERE user_id = ?
 `
 
 const InsertIntoLocale = `

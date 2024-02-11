@@ -43,7 +43,7 @@ func CreateTables() {
 		queries.CreateChatroomParticipantsTable,
 		queries.CreateChatroomTable,
 		queries.CreateGameModesTable,
-		queries.CreateGroupMembersTable,
+		queries.CreateGroupUsersTable,
 		queries.CreateGroupTable,
 		queries.CreateLocaleTable,
 		queries.CreateMessageTable,
@@ -75,6 +75,23 @@ func PopulateTables() {
 		_, err := db.GetDB().Query(queries.InsertIntoLocale,
 			locale.Name,
 			locale.FlagCode,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	sportsData := []data.Sport{
+		{Name: "soccer", FeatureAvailable: true},
+		{Name: "basketball", FeatureAvailable: false},
+		{Name: "tennis", FeatureAvailable: false},
+		{Name: "american_football", FeatureAvailable: false},
+	}
+
+	for _, sport := range sportsData {
+		_, err := db.GetDB().Query(queries.InsertIntoSport,
+			sport.Name,
+			sport.FeatureAvailable,
 		)
 		if err != nil {
 			panic(err)

@@ -21,7 +21,7 @@ func main() {
 		queries.DropChatroomParticipantsTable,
 		queries.DropChatroomTable,
 		queries.DropGameModesTable,
-		queries.DropGroupMembersTable,
+		queries.DropGroupUsersTable,
 		queries.DropGroupTable,
 		queries.DropLocaleTable,
 		queries.DropMessageTable,

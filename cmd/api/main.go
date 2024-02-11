@@ -32,6 +32,17 @@ func main() {
 	v1.POST("/activities", middlewares.WithToken(), handlers.HandleCreateActivity)
 	v1.PUT("/activities/registration", middlewares.WithToken(), handlers.HandleParticipantsRegistration)
 
+	// groups
+	v1.GET("/groups/users/:organizerId", handlers.HandleGetAllGroupsByOrganizer)
+	v1.GET("/groups/:id", handlers.HandleGetGroups)
+	v1.POST("/groups", handlers.HandleCreateGroup)
+
+	// locales
+	v1.GET("/locales", handlers.HandleGetAllLocales)
+
+	// sports
+	v1.GET("/sports", handlers.HandleGetAllSports)
+
 	// user
 	v1.GET("/me", middlewares.WithToken(), handlers.HandleMe)
 	v1.GET("/me-settings", middlewares.WithToken(), handlers.HandleMeSettings)

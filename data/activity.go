@@ -66,10 +66,22 @@ func AllActivities() (*[]Activity, error) {
 	return &activities, nil
 }
 
-func InsertActivity(address string, date string, maxPlayers int, description string, organizerId int64, price float32, rules string, time string, title string, isPrivate bool, sportId int64) (*Activity, error) {
+func InsertActivity(address string, date string, maxPlayers int, description string, organizerId int64, price float32, rules string, time string, title string, isPrivate bool, sportId uint64) (*Activity, error) {
 	dbInstance := db.GetDB()
 
-	result, err := dbInstance.Exec(
+	tx, err := dbInstance.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+			return
+		}
+		_ = tx.Commit()
+	}()
+
+	result, err := tx.Exec(
 		queries.InsertActivity,
 		address,
 		date,
@@ -94,7 +106,7 @@ func InsertActivity(address string, date string, maxPlayers int, description str
 
 	var insertedActivity Activity
 
-	err = dbInstance.QueryRow(
+	err = tx.QueryRow(
 		queries.SelectActivityById,
 		lastInsertID,
 	).Scan(
@@ -117,5 +129,5 @@ func InsertActivity(address string, date string, maxPlayers int, description str
 		return nil, err
 	}
 
-	return &insertedActivity, err
+	return &insertedActivity, nil
 }
