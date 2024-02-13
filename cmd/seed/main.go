@@ -197,6 +197,7 @@ func PopulateTables() {
 			user.Sexe,
 			user.Timezone,
 			user.Username,
+			true,
 		)
 		if err != nil {
 			panic(err)

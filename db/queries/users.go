@@ -8,11 +8,11 @@ const CreateUserTables = `
 		bio VARCHAR(255),
 		city VARCHAR(255),
 		email VARCHAR(255),
-		email_verified BOOLEAN,
+		email_verified BOOL DEFAULT 0,
 		full_name VARCHAR(255),
-		is_inactive BOOLEAN,
-		inactive_date DATETIME NULL,
-		join_date DATETIME,
+		is_inactive BOOL DEFAULT 0,
+		inactive_date TIMESTAMP,
+		join_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		locale_region VARCHAR(255),
 		match_organized_count INT,
 		match_played_count INT,
@@ -24,6 +24,7 @@ const CreateUserTables = `
 		sexe VARCHAR(255),
 		timezone VARCHAR(255),
 		username VARCHAR(255)
+		agreed_to_terms BOOL DEFAULT 1,
 	);
 
 `
@@ -34,8 +35,8 @@ const InsertUser = `
 	INSERT INTO users (
 		account_type, avatar, bio, city, email, email_verified, full_name, is_inactive,
 		inactive_date, join_date, locale_region, match_organized_count, match_played_count,
-		password, permissions, phone, reliability, role, sexe, timezone, username
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		password, permissions, phone, reliability, role, sexe, timezone, username, agreed_to_terms
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 const InsertUserSetting = `
 	INSERT INTO user_settings (
@@ -48,8 +49,65 @@ const InsertUserSetting = `
 		show_email,
 		show_phone,
 		show_groups,
-		user_id
+		user_id[]
 	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`
+const UserExistsByEmail = `
+	SELECT EXISTS(SELECT 1 FROM users WHERE email = ?);
+`
+const SelectUserByEmail = `
+	SELECT 
+		id,
+		account_type,
+		avatar,
+		bio,
+		city,
+		email,
+		email_verified,
+		full_name,
+ 		is_inactive,
+		inactive_date,
+		join_date,
+		locale_region,
+		match_organized_count,
+		match_played_count,
+		permissions,
+		phone,
+		reliability,
+		role,
+		sexe,
+		timezone,
+		username,
+		agreed_to_terms
+	FROM users 
+	WHERE email = ?
+`
+const SelectUserById = `
+	SELECT 
+		id,
+		account_type,
+		avatar,
+		bio,
+		city,
+		email,
+		email_verified,
+		full_name,
+ 		is_inactive,
+		inactive_date,
+		join_date,
+		locale_region,
+		match_organized_count,
+		match_played_count,
+		permissions,
+		phone,
+		reliability,
+		role,
+		sexe,
+		timezone,
+		agreed_to_terms,
+		username 
+	FROM users 
+	WHERE id = ?
 `
 const SelectPasswordOnlyWhereUsernameEquals = `
 	SELECT password 
@@ -78,6 +136,7 @@ const SelectAllColumnsExceptPasswordWhereIDEquals = `
 		role,
 		sexe,
 		timezone,
+		agreed_to_terms,
 		username  
 	FROM users
 	WHERE id = ?
@@ -104,6 +163,7 @@ const SelectAllColumnsExceptPasswordWhereUsernameEquals = `
 		role,
 		sexe,
 		timezone,
+		agreed_to_terms,
 		username  
 	FROM users
 	WHERE username = ?
@@ -130,6 +190,7 @@ const SelectAllColumnsExceptPassword = `
 		role,
 		sexe,
 		timezone,
+		agreed_to_terms,
 		username  
 	FROM users
 `

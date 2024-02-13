@@ -48,6 +48,7 @@ func main() {
 	v1.GET("/me-settings", middlewares.WithToken(), handlers.HandleMeSettings)
 	v1.GET("/logout", handlers.HandleLogout)
 	v1.POST("/login", handlers.HandleLogin)
+	v1.POST("/google-login", handlers.HandleLoginWithGoogle)
 	v1.POST("/users", handlers.HandleCreateMe)
 
 	err := g.Run(os.Getenv("LISTEN_PORT"))

@@ -56,49 +56,38 @@ func HandleLogin(g *gin.Context) {
 		return
 	}
 
-	refreshToken, err := util.GenerateRefresh(user.ID, user.Username, user.Email, user.EmailVerified)
-	if err != nil {
-		g.JSON(http.StatusInternalServerError, err)
+	generateTokens(g, user)
+
+	g.JSON(http.StatusOK, gin.H{
+		"result": user,
+	})
+}
+
+type LoginWithGoogleRequest struct {
+	Email         string `json:"email" binding:"required"`
+	Locale        string `json:"locale" binding:"required"`
+	Name          string `json:"name" binding:"required"`
+	Picture       string `json:"picture" binding:"omitempty"`
+	VerifiedEmail bool   `json:"verifiedEmail" binding:"required"`
+}
+
+func HandleLoginWithGoogle(g *gin.Context) {
+	var req LoginWithGoogleRequest
+
+	if err := g.ShouldBindJSON(&req); err != nil {
+		g.JSON(http.StatusBadRequest, gin.H{"error": errors.New("bad payload").Error()})
 		return
 	}
 
-	err = data.InsertNewToken(refreshToken, user.ID)
+	user, err := data.MatchUserByEmail(req.Email, req.Locale, req.Name, req.Picture, req.VerifiedEmail)
 	if err != nil {
-		g.JSON(http.StatusInternalServerError, err)
+		g.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
 		return
 	}
 
-	accessToken, err := util.GenerateAccess(user.ID, user.Username, user.Email, user.EmailVerified)
-	if err != nil {
-		g.JSON(http.StatusInternalServerError, err)
-		return
-	}
-
-	err = data.InsertNewToken(accessToken, user.ID)
-	if err != nil {
-		g.JSON(http.StatusInternalServerError, err)
-		return
-	}
-
-	g.SetCookie(
-		"refreshToken",
-		refreshToken,
-		3.154e10,
-		"/api/v1",
-		g.Request.Host,
-		util.IsSecure(),
-		true,
-	)
-
-	g.SetCookie(
-		"accessToken",
-		accessToken,
-		300000,
-		"/api/v1",
-		g.Request.Host,
-		util.IsSecure(),
-		true,
-	)
+	generateTokens(g, user)
 
 	g.JSON(http.StatusOK, gin.H{
 		"result": user,
@@ -165,14 +154,61 @@ func HandleCreateMe(g *gin.Context) {
 
 	data.InsertUser(
 		user_req.FullName,
-		user_req.Email,
 		user_req.Username,
+		user_req.Email,
 		user_req.Password,
 		user_req.Phone,
 		user_req.Sexe,
 		user_req.AgreedToTerms,
+		false,
 	)
 
 	g.JSON(http.StatusCreated, "user_req")
 
+}
+
+func generateTokens(g *gin.Context, user *data.User) {
+	refreshToken, err := util.GenerateRefresh(user.ID, user.Username, user.Email, user.EmailVerified)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	err = data.InsertNewToken(refreshToken, user.ID)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	accessToken, err := util.GenerateAccess(user.ID, user.Username, user.Email, user.EmailVerified)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	err = data.InsertNewToken(accessToken, user.ID)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	g.SetCookie(
+		"refreshToken",
+		refreshToken,
+		3.154e10,
+		"/api/v1",
+		g.Request.Host,
+		util.IsSecure(),
+		true,
+	)
+
+	g.SetCookie(
+		"accessToken",
+		accessToken,
+		300000,
+		"/api/v1",
+		g.Request.Host,
+		util.IsSecure(),
+		true,
+	)
 }

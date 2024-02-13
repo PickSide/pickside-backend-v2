@@ -1,9 +1,13 @@
 package data
 
 import (
+	"database/sql"
+	"log"
 	"pickside/service/db"
 	"pickside/service/db/queries"
 	"pickside/service/types"
+	"pickside/service/util"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -12,9 +16,9 @@ import (
 type User struct {
 	ID                  uint64            `json:"id"`
 	AccountType         types.AccountType `json:"accountType"`
-	Avatar              string
-	Bio                 string
-	City                string
+	Avatar              string            `json:"avatar" binding:"omitempty"`
+	Bio                 string            `json:"bio" binding:"omitempty"`
+	City                string            `json:"city" binding:"omitempty"`
 	Email               string
 	EmailVerified       bool       `json:"emailVerified"`
 	FullName            string     `json:"fullName"`
@@ -32,6 +36,7 @@ type User struct {
 	Sexe                types.Sexe
 	Timezone            string
 	Username            string
+	AgreedToTerms       bool         `json:"agreedToTerms"`
 	UserSettings        UserSettings `json:"settings" gorm:"foreignKey:UserID"`
 }
 
@@ -85,6 +90,118 @@ func MatchUser(username string, password string) (*User, error) {
 	return &user, err
 }
 
+func MatchUserByEmail(email string, locale string, name string, picture string, verifiedEmail bool) (*User, error) {
+	dbInstance := db.GetDB()
+
+	log.Println("MatchUserByEmail")
+	var user User
+
+	err := dbInstance.QueryRow(queries.SelectUserByEmail, email).Scan(
+		&user.ID,
+		&user.AccountType,
+		&user.Avatar,
+		&user.Bio,
+		&user.City,
+		&user.Email,
+		&user.EmailVerified,
+		&user.FullName,
+		&user.IsInactive,
+		&user.InactiveDate,
+		&user.JoinDate,
+		&user.LocaleRegion,
+		&user.MatchOrganizedCount,
+		&user.MatchPlayedCount,
+		&user.Permissions,
+		&user.Phone,
+		&user.Reliability,
+		&user.Role,
+		&user.Sexe,
+		&user.Timezone,
+		&user.Username,
+		&user.AgreedToTerms,
+	)
+
+	if err == sql.ErrNoRows {
+		username, err := util.GenerateRandomUsername(10)
+		if err != nil {
+			return nil, err
+		}
+
+		location, err := time.LoadLocation("America/New_York")
+		if err != nil {
+			panic(err)
+		}
+
+		result, err := dbInstance.Exec(queries.InsertUser,
+			types.GOOGLE,
+			"",
+			"",
+			"",
+			email,
+			true,
+			name,
+			false,      //is inactive
+			nil,        // inactive date
+			time.Now(), // join date
+			"",         // locale region
+			0,
+			0,
+			"",
+			strings.Join([]string{types.ACTIVITIES_VIEW, types.NOTIFICATIONS_RECEIVE, types.GOOGLE_LOCATION_SEARCH, types.MAP_VIEW}, ","),
+			"",
+			0.00,
+			types.USER,
+			"male",
+			location.String(),
+			username,
+			true,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		lastInsertID, err := result.LastInsertId()
+		if err != nil {
+			return nil, err
+		}
+
+		var insertedUser User
+
+		err = dbInstance.QueryRow(
+			queries.SelectUserById,
+			lastInsertID,
+		).Scan(
+			&insertedUser.ID,
+			&insertedUser.AccountType,
+			&insertedUser.Avatar,
+			&insertedUser.Bio,
+			&insertedUser.City,
+			&insertedUser.Email,
+			&insertedUser.EmailVerified,
+			&insertedUser.FullName,
+			&insertedUser.IsInactive,
+			&insertedUser.InactiveDate,
+			&insertedUser.JoinDate,
+			&insertedUser.LocaleRegion,
+			&insertedUser.MatchOrganizedCount,
+			&insertedUser.MatchPlayedCount,
+			&insertedUser.Permissions,
+			&insertedUser.Phone,
+			&insertedUser.Reliability,
+			&insertedUser.Role,
+			&insertedUser.Sexe,
+			&insertedUser.Timezone,
+			&insertedUser.Username,
+		)
+
+		user = insertedUser
+	} else if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func GetMe(id uint64) (*User, error) {
 	dbInstance := db.GetDB()
 
@@ -117,7 +234,7 @@ func GetMe(id uint64) (*User, error) {
 	return &user, err
 }
 
-func InsertUser(fullName string, username string, email string, pwd string, phone string, sexe string, agreedToTerms bool) error {
+func InsertUser(fullName string, username string, email string, pwd string, phone string, sexe string, agreedToTerms bool, verifiedEmail bool) error {
 	dbInstance := db.GetDB()
 
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(pwd), 10)
@@ -132,6 +249,7 @@ func InsertUser(fullName string, username string, email string, pwd string, phon
 		hashedPwd,
 		phone,
 		sexe,
+		false,
 		agreedToTerms,
 	)
 
