@@ -2,7 +2,6 @@ package data
 
 import (
 	"database/sql"
-	"log"
 	"pickside/service/db"
 	"pickside/service/db/queries"
 	"pickside/service/types"
@@ -93,7 +92,6 @@ func MatchUser(username string, password string) (*User, error) {
 func MatchUserByEmail(email string, locale string, name string, picture string, verifiedEmail bool) (*User, error) {
 	dbInstance := db.GetDB()
 
-	log.Println("MatchUserByEmail")
 	var user User
 
 	err := dbInstance.QueryRow(queries.SelectUserByEmail, email).Scan(
@@ -192,6 +190,7 @@ func MatchUserByEmail(email string, locale string, name string, picture string, 
 			&insertedUser.Sexe,
 			&insertedUser.Timezone,
 			&insertedUser.Username,
+			&insertedUser.AgreedToTerms,
 		)
 
 		user = insertedUser
