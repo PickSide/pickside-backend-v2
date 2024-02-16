@@ -24,32 +24,35 @@ func main() {
 	}
 
 	g.Use(cors.Default())
-	v1 := g.Group("/api/v2", middlewares.FromValidDomain())
+	v2 := g.Group("/api/v2", middlewares.FromValidDomain())
 
 	//activities
-	v1.GET("/activities", handlers.HandleGetAllActivities)
-	v1.GET("/activities/:activityId/participants", handlers.HandleGetParticipants)
-	v1.POST("/activities", middlewares.WithToken(), handlers.HandleCreateActivity)
-	v1.PUT("/activities/registration", middlewares.WithToken(), handlers.HandleParticipantsRegistration)
+	v2.GET("/activities", handlers.HandleGetAllActivities)
+	v2.GET("/activities/:activityId/participants", handlers.HandleGetParticipants)
+	v2.POST("/activities", middlewares.WithToken(), handlers.HandleCreateActivity)
+	v2.PUT("/activities/registration", middlewares.WithToken(), handlers.HandleParticipantsRegistration)
 
 	// groups
-	v1.GET("/groups/users/:organizerId", handlers.HandleGetAllGroupsByOrganizer)
-	v1.GET("/groups/:id", handlers.HandleGetGroups)
-	v1.POST("/groups", handlers.HandleCreateGroup)
+	v2.GET("/groups/users/:organizerId", handlers.HandleGetAllGroupsByOrganizer)
+	v2.GET("/groups/:id", handlers.HandleGetGroups)
+	v2.POST("/groups", handlers.HandleCreateGroup)
 
 	// locales
-	v1.GET("/locales", handlers.HandleGetAllLocales)
+	v2.GET("/locales", handlers.HandleGetAllLocales)
 
 	// sports
-	v1.GET("/sports", handlers.HandleGetAllSports)
+	v2.GET("/sports", handlers.HandleGetAllSports)
+
+	v2.GET("/me", middlewares.WithToken(), handlers.HandleMe)
+	v2.GET("/me-settings", middlewares.WithToken(), handlers.HandleMeSettings)
+	v2.GET("/logout", handlers.HandleLogout)
+	v2.POST("/login", handlers.HandleLogin)
+	v2.POST("/google-login", handlers.HandleLoginWithGoogle)
 
 	// user
-	v1.GET("/me", middlewares.WithToken(), handlers.HandleMe)
-	v1.GET("/me-settings", middlewares.WithToken(), handlers.HandleMeSettings)
-	v1.GET("/logout", handlers.HandleLogout)
-	v1.POST("/login", handlers.HandleLogin)
-	v1.POST("/google-login", handlers.HandleLoginWithGoogle)
-	v1.POST("/users", handlers.HandleCreateMe)
+	v2.PUT("/users/:userId/activities/:activityId/favorites", middlewares.WithToken(), handlers.HandleUpdateFavorites)
+	v2.POST("/users", handlers.HandleCreateMe)
+	v2.POST("/users/:userId/activity", handlers.HandleCreateMe)
 
 	err := g.Run(os.Getenv("LISTEN_PORT"))
 

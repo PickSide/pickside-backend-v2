@@ -1,7 +1,9 @@
 package middlewares
 
 import (
+	"log"
 	"net/http"
+	"os"
 	"pickside/service/util"
 	"time"
 
@@ -10,7 +12,7 @@ import (
 
 func WithToken() gin.HandlerFunc {
 	return func(g *gin.Context) {
-		// Check refreshToken
+
 		refreshToken, err := g.Cookie("refreshToken")
 		if err != nil {
 			g.JSON(http.StatusNotFound, "not found please login")
@@ -18,7 +20,6 @@ func WithToken() gin.HandlerFunc {
 			return
 		}
 
-		// Check valid
 		valid := util.IsTokenValid(refreshToken)
 		if !valid {
 			g.JSON(http.StatusForbidden, "token expired please login")
@@ -35,6 +36,7 @@ func WithToken() gin.HandlerFunc {
 
 		accessToken, err := g.Cookie("accessToken")
 		if err != nil {
+			log.Println("if err != nil")
 			token, err := util.GenerateAccess(uint64(userClaims.ID), userClaims.Username, userClaims.Email, userClaims.EmailVerified)
 			if err != nil {
 				g.JSON(http.StatusInternalServerError, err.Error())
@@ -46,7 +48,7 @@ func WithToken() gin.HandlerFunc {
 				"accessToken",
 				token,
 				int(time.Now().Add(time.Second*5).Unix()),
-				"/api/v1",
+				"/api/"+os.Getenv("API_VERSION"),
 				g.Request.Host,
 				util.IsSecure(),
 				true,
@@ -56,6 +58,7 @@ func WithToken() gin.HandlerFunc {
 		if !util.IsTokenValid(accessToken) {
 			token, err := util.GenerateAccess(uint64(userClaims.ID), userClaims.Username, userClaims.Email, userClaims.EmailVerified)
 			if err != nil {
+				log.Println(err.Error())
 				g.JSON(http.StatusInternalServerError, err.Error())
 				g.Abort()
 				return
@@ -65,7 +68,7 @@ func WithToken() gin.HandlerFunc {
 				"accessToken",
 				token,
 				int(time.Now().Add(time.Second*5).Unix()),
-				"/api/v1",
+				"/api/"+os.Getenv("API_VERSION"),
 				g.Request.Host,
 				util.IsSecure(),
 				true,

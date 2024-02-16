@@ -44,9 +44,8 @@ type UserMetadata struct {
 
 type JWTClaims struct {
 	jwt.Claims
-	//UserMetadata  UserMetadata `json:"user_metadata"`
-	ID            float64 `json:"sub"`
-	Email         string  `json:"email"`
-	Username      string  `json:"username"`
-	EmailVerified bool    `json:"email_verified"`
+	ID            uint64 `json:"user_id"`
+	Email         string `json:"email"`
+	Username      string `json:"username"`
+	EmailVerified bool   `json:"email_verified"`
 }

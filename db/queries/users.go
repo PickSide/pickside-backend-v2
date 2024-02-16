@@ -10,6 +10,7 @@ const CreateUserTables = `
 		email VARCHAR(255),
 		email_verified BOOL DEFAULT 0,
 		full_name VARCHAR(255),
+		favorites VARCHAR(255),
 		is_inactive BOOL DEFAULT 0,
 		inactive_date TIMESTAMP,
 		join_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -23,8 +24,8 @@ const CreateUserTables = `
 		role ENUM('admin', 'user'),
 		sexe VARCHAR(255),
 		timezone VARCHAR(255),
-		username VARCHAR(255)
-		agreed_to_terms BOOL DEFAULT 1,
+		username VARCHAR(255),
+		agreed_to_terms BOOL DEFAULT 1
 	);
 
 `
@@ -33,10 +34,10 @@ const DropUserTables = `
 `
 const InsertUser = `
 	INSERT INTO users (
-		account_type, avatar, bio, city, email, email_verified, full_name, is_inactive,
+		account_type, avatar, bio, city, email, email_verified, full_name, favorites, is_inactive,
 		inactive_date, join_date, locale_region, match_organized_count, match_played_count,
 		password, permissions, phone, reliability, role, sexe, timezone, username, agreed_to_terms
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 const InsertUserSetting = `
 	INSERT INTO user_settings (
@@ -49,157 +50,51 @@ const InsertUserSetting = `
 		show_email,
 		show_phone,
 		show_groups,
-		user_id[]
+		user_id
 	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-`
-const UserExistsByEmail = `
-	SELECT EXISTS(SELECT 1 FROM users WHERE email = ?);
 `
 const SelectUserByEmail = `
 	SELECT 
-		id,
-		account_type,
-		avatar,
-		bio,
-		city,
-		email,
-		email_verified,
-		full_name,
- 		is_inactive,
-		inactive_date,
-		join_date,
-		locale_region,
-		match_organized_count,
-		match_played_count,
-		permissions,
-		phone,
-		reliability,
-		role,
-		sexe,
-		timezone,
-		username,
-		agreed_to_terms
+		id, account_type, avatar, bio, city, email,
+		email_verified,	full_name, favorites, is_inactive, inactive_date,
+		join_date, locale_region, match_organized_count, 
+		match_played_count, permissions, phone, reliability,
+		role, sexe, timezone, username, agreed_to_terms
 	FROM users 
 	WHERE email = ?
 `
 const SelectUserById = `
 	SELECT 
-		id,
-		account_type,
-		avatar,
-		bio,
-		city,
-		email,
-		email_verified,
-		full_name,
- 		is_inactive,
-		inactive_date,
-		join_date,
-		locale_region,
-		match_organized_count,
-		match_played_count,
-		permissions,
-		phone,
-		reliability,
-		role,
-		sexe,
-		timezone,
-		agreed_to_terms,
-		username 
+		id, account_type, avatar, bio, city, email,
+		email_verified,	full_name, favorites, is_inactive, inactive_date,
+		join_date, locale_region, match_organized_count, 
+		match_played_count, permissions, phone, reliability,
+		role, sexe, timezone, username, agreed_to_terms
 	FROM users 
 	WHERE id = ?
 `
-const SelectPasswordOnlyWhereUsernameEquals = `
+const SelectPasswordOnly = `
 	SELECT password 
 	FROM users 
 	WHERE username = ?
 `
-const SelectAllColumnsExceptPasswordWhereIDEquals = `
+const SelectByUsername = `
 	SELECT 
-    	id,
-		account_type,
-		avatar,
-		bio,
-		city,
-		email,
-		email_verified,
-		full_name,
- 		is_inactive,
-		inactive_date,
-		join_date,
-		locale_region,
-		match_organized_count,
-		match_played_count,
-		permissions,
-		phone,
-		reliability,
-		role,
-		sexe,
-		timezone,
-		agreed_to_terms,
-		username  
+    	id, account_type, avatar, bio, city, email,
+		email_verified,	full_name, favorites, is_inactive, inactive_date,
+		join_date, locale_region, match_organized_count, 
+		match_played_count, permissions, phone, reliability,
+		role, sexe, timezone, username, agreed_to_terms
+	FROM users
+	WHERE username = ?
+`
+const SelectFavorites = `
+	SELECT favorites
 	FROM users
 	WHERE id = ?
 `
-const SelectAllColumnsExceptPasswordWhereUsernameEquals = `
-	SELECT 
-    	id,
-		account_type,
-		avatar,
-		bio,
-		city,
-		email,
-		email_verified,
-		full_name,
- 		is_inactive,
-		inactive_date,
-		join_date,
-		locale_region,
-		match_organized_count,
-		match_played_count,
-		permissions,
-		phone,
-		reliability,
-		role,
-		sexe,
-		timezone,
-		agreed_to_terms,
-		username  
-	FROM users
-	WHERE username = ?
-`
-const SelectAllColumnsExceptPassword = `
-	SELECT 
-    	id,
-		account_type,
-		avatar,
-		bio,
-		city,
-		email,
-		email_verified,
-		full_name,
- 		is_inactive,
-		inactive_date,
-		join_date,
-		locale_region,
-		match_organized_count,
-		match_played_count,
-		permissions,
-		phone,
-		reliability,
-		role,
-		sexe,
-		timezone,
-		agreed_to_terms,
-		username  
-	FROM users
-`
-const SelectClaimsWhereUsernameEquals = `
-	SELECT 
-    	id,
-		email,
-		email_verified,
-		username  
-	FROM users
-	WHERE username = ?
+const UpdateFavorites = `
+	UPDATE users
+	SET favorites = ?
+	WHERE id = ?
 `

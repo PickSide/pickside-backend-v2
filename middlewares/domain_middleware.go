@@ -1,8 +1,10 @@
 package middlewares
 
 import (
-	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 var allowedDomains = []string{"localhost:8080", "127.0.0.1:8080", "pickside.net"}
@@ -18,6 +20,7 @@ func FromValidDomain() gin.HandlerFunc {
 				break
 			}
 		}
+		log.Println(isValidDomain)
 
 		if !isValidDomain {
 			g.String(http.StatusForbidden, "invalid domain")

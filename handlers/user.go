@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"pickside/service/data"
 	"pickside/service/util"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -21,20 +23,23 @@ func HandleMe(g *gin.Context) {
 	refreshToken, err := g.Cookie("refreshToken")
 	if err != nil {
 		g.JSON(http.StatusUnauthorized, err)
+		return
 	}
 
 	parsedToken, err := util.ExtractClaims(refreshToken)
 	if err != nil {
-		g.JSON(http.StatusUnauthorized, err)
+		g.JSON(http.StatusUnauthorized, err.Error())
+		return
 	}
 
-	user, err := data.GetMe(uint64(parsedToken.ID))
+	user, err := data.GetMe(parsedToken.ID)
 	if err != nil {
-		fmt.Printf("parsedToken.Id %v", parsedToken.ID)
-		g.JSON(http.StatusInternalServerError, err)
+		g.JSON(http.StatusInternalServerError, err.Error())
+		return
 	}
 
 	g.JSON(http.StatusOK, gin.H{"result": user})
+	return
 }
 
 type AuthenticationRequest struct {
@@ -52,7 +57,7 @@ func HandleLogin(g *gin.Context) {
 
 	user, err := data.MatchUser(authRequest.Username, authRequest.Password)
 	if err != nil {
-		g.JSON(http.StatusNotFound, err)
+		g.JSON(http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -99,7 +104,7 @@ func HandleLogout(g *gin.Context) {
 		"accessToken",
 		"",
 		-1,
-		"/api/v1",
+		"/api/"+os.Getenv("API_VERSION"),
 		g.Request.Host,
 		util.IsSecure(),
 		true,
@@ -108,7 +113,7 @@ func HandleLogout(g *gin.Context) {
 		"refreshToken",
 		"",
 		-1,
-		"/api/v1",
+		"/api/"+os.Getenv("API_VERSION"),
 		g.Request.Host,
 		util.IsSecure(),
 		true,
@@ -164,7 +169,54 @@ func HandleCreateMe(g *gin.Context) {
 	)
 
 	g.JSON(http.StatusCreated, "user_req")
+}
 
+func HandleGetFavorites(g *gin.Context) {
+	userIdString := g.Params.ByName("activityId")
+
+	userId, err := strconv.ParseUint(userIdString, 10, 64)
+	if err != nil {
+		g.JSON(http.StatusNotFound, err.Error())
+		return
+	}
+
+	results, err := data.GetFavorites(userId)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	g.JSON(http.StatusOK, gin.H{"results": results})
+	return
+}
+
+func HandleUpdateFavorites(g *gin.Context) {
+	userIdString := g.Params.ByName("userId")
+
+	activityIdString := g.Params.ByName("activityId")
+
+	userId, err := strconv.ParseUint(userIdString, 10, 64)
+	if err != nil {
+		g.JSON(http.StatusNotFound, err.Error())
+		return
+	}
+
+	activityId, err := strconv.ParseUint(activityIdString, 10, 64)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	result, err := data.UpdateFavorites(userId, activityId)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	g.JSON(http.StatusOK, gin.H{
+		"message": result,
+	})
+	return
 }
 
 func generateTokens(g *gin.Context, user *data.User) {
@@ -174,11 +226,11 @@ func generateTokens(g *gin.Context, user *data.User) {
 		return
 	}
 
-	err = data.InsertNewToken(refreshToken, user.ID)
-	if err != nil {
-		g.JSON(http.StatusInternalServerError, err)
-		return
-	}
+	// err = data.InsertNewToken(refreshToken, user.ID)
+	// if err != nil {
+	// 	g.JSON(http.StatusInternalServerError, err)
+	// 	return
+	// }
 
 	accessToken, err := util.GenerateAccess(user.ID, user.Username, user.Email, user.EmailVerified)
 	if err != nil {
@@ -186,17 +238,17 @@ func generateTokens(g *gin.Context, user *data.User) {
 		return
 	}
 
-	err = data.InsertNewToken(accessToken, user.ID)
-	if err != nil {
-		g.JSON(http.StatusInternalServerError, err)
-		return
-	}
+	// err = data.InsertNewToken(accessToken, user.ID)
+	// if err != nil {
+	// 	g.JSON(http.StatusInternalServerError, err)
+	// 	return
+	// }
 
 	g.SetCookie(
 		"refreshToken",
 		refreshToken,
 		3.154e10,
-		"/api/v1",
+		"/api/"+os.Getenv("API_VERSION"),
 		g.Request.Host,
 		util.IsSecure(),
 		true,
@@ -206,9 +258,11 @@ func generateTokens(g *gin.Context, user *data.User) {
 		"accessToken",
 		accessToken,
 		300000,
-		"/api/v1",
+		"/api/"+os.Getenv("API_VERSION"),
 		g.Request.Host,
 		util.IsSecure(),
 		true,
 	)
+
+	return
 }

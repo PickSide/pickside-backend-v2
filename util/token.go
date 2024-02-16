@@ -22,7 +22,7 @@ func GenerateRefresh(userID uint64, username string, email string, emailVerified
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
-	claims["user_id"] = float64(userID)
+	claims["user_id"] = userID
 	claims["username"] = username
 	claims["email"] = email
 	claims["email_verified"] = emailVerified
@@ -37,7 +37,7 @@ func GenerateAccess(userID uint64, username string, email string, emailVerified 
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
-	claims["user_id"] = float64(userID)
+	claims["user_id"] = userID
 	claims["username"] = username
 	claims["email"] = email
 	claims["email_verified"] = emailVerified
@@ -61,8 +61,13 @@ func ExtractClaims(tokenString string) (*types.JWTClaims, error) {
 		return nil, errors.New("error parsing claims")
 	}
 
+	userIDFloat64, ok := claims["user_id"].(float64)
+	if !ok {
+		return nil, errors.New("user_id not found or not a float64 in claims")
+	}
+
 	return &types.JWTClaims{
-		ID:            claims["user_id"].(float64),
+		ID:            uint64(userIDFloat64),
 		Username:      claims["username"].(string),
 		Email:         claims["email"].(string),
 		EmailVerified: claims["email_verified"].(bool),
