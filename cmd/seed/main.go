@@ -67,12 +67,12 @@ func PopulateTables() {
 	log.Println("Seeding table...")
 
 	localesData := []data.Locale{
-		{Name: "english", FlagCode: "en"},
-		{Name: "français", FlagCode: "fr"},
+		{Name: "english", Value: "en", FlagCode: "us"},
+		{Name: "français", Value: "fr", FlagCode: "fr"},
 	}
 
 	for _, locale := range localesData {
-		_, err := db.GetDB().Query(queries.InsertIntoLocale, locale.Name, locale.FlagCode)
+		_, err := db.GetDB().Query(queries.InsertIntoLocale, locale.Name, locale.Value, locale.FlagCode)
 		if err != nil {
 			panic(err)
 		}
@@ -101,7 +101,7 @@ func PopulateTables() {
 	}
 
 	for _, gameMode := range gameModesData {
-		_, err := db.GetDB().Query(queries.InsertIntoGameMode, gameMode.Name)
+		_, err := db.GetDB().Query("INSERT INTO game_modes (name) VALUES (?)", gameMode.Name)
 		if err != nil {
 			panic(err)
 		}
@@ -121,7 +121,7 @@ func PopulateTables() {
 	}
 
 	for _, sportGameMode := range sportGameModesData {
-		_, err := db.GetDB().Query(queries.InsertIntoSportGameMode, sportGameMode.GameModeID, sportGameMode.SportID)
+		_, err := db.GetDB().Query("INSERT INTO sport_game_modes (game_mode_id, sport_id) VALUES (?, ?)", sportGameMode.GameModeID, sportGameMode.SportID)
 		if err != nil {
 			panic(err)
 		}
@@ -149,34 +149,41 @@ func PopulateTables() {
 	var users []data.User
 
 	for _, user := range usersData {
+		bio := "My bio"
+		city := "Montreal"
+		localeRegion := "montreal"
+		phone := "514-123-45679"
+		timezone := location.String()
+		reliability := 50
+
 		users = append(users, data.User{
 			AccountType:         types.DEFAULT,
-			Avatar:              "",
-			Bio:                 "My bio",
-			City:                "Montreal",
+			Avatar:              nil,
+			Bio:                 &bio,
+			City:                &city,
 			Password:            string(hashPassword),
 			EmailVerified:       true,
 			FullName:            user.FullName,
-			Favorites:           "",
+			Favorites:           nil,
 			Email:               user.Email,
 			Username:            user.Username,
 			IsInactive:          false,
 			InactiveDate:        nil,
 			JoinDate:            time.Now(),
-			LocaleRegion:        "montreal",
+			LocaleRegion:        &localeRegion,
 			MatchOrganizedCount: 0,
 			MatchPlayedCount:    0,
-			Permissions:         strings.Join([]string{types.ACTIVITIES_VIEW, types.NOTIFICATIONS_RECEIVE, types.GOOGLE_LOCATION_SEARCH, types.MAP_VIEW}, ","),
-			Phone:               "514-123-45679",
-			Reliability:         50,
+			Permissions:         strings.Join(types.DEFAULT_PERMISSIONS[:], ","),
+			Phone:               &phone,
+			Reliability:         &reliability,
 			Role:                types.USER,
 			Sexe:                types.MALE,
-			Timezone:            location.String(),
+			Timezone:            &timezone,
 		})
 	}
 
 	for i, user := range users {
-		_, err := db.GetDB().Exec(queries.InsertUser,
+		_, err := db.GetDB().Exec(queries.InsertUserSeed,
 			user.AccountType, user.Avatar, user.Bio, user.City, user.Email, user.EmailVerified, user.FullName, user.Favorites, user.IsInactive,
 			user.InactiveDate, user.JoinDate, user.LocaleRegion, user.MatchOrganizedCount, user.MatchPlayedCount,
 			user.Password, user.Permissions, user.Phone, user.Reliability, user.Role, user.Sexe, user.Timezone, user.Username, true,
@@ -185,17 +192,29 @@ func PopulateTables() {
 			panic(err)
 		}
 
+		settings := data.UserSettings{
+			AllowLocationTracking: false,
+			PreferredLocale:       "en",
+			PreferredRegion:       "soccer",
+			PreferredSport:        "light",
+			PreferredTheme:        "montreal",
+			ShowAge:               true,
+			ShowEmail:             true,
+			ShowGroups:            false,
+			ShowPhone:             false,
+		}
+
 		_, err = db.GetDB().Exec(queries.InsertUserSetting,
-			"soccer",   // preferred_sport
-			"en",       // preferred_locale
-			"light",    // preferred_theme
-			"montreal", // preferred_region
-			false,      // allow_location_tracking
-			true,       // show_age
-			true,       // show_email
-			false,      // show_phone,
-			false,      // show_groups,
-			i,
+			settings.AllowLocationTracking,
+			settings.PreferredLocale,
+			settings.PreferredRegion,
+			settings.PreferredSport,
+			settings.PreferredTheme,
+			settings.ShowAge,
+			settings.ShowEmail,
+			settings.ShowGroups,
+			settings.ShowPhone,
+			uint64(i+1),
 		)
 		if err != nil {
 			panic(err)

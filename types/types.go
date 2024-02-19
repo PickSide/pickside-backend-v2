@@ -49,3 +49,10 @@ type JWTClaims struct {
 	Username      string `json:"username"`
 	EmailVerified bool   `json:"email_verified"`
 }
+
+var DEFAULT_PERMISSIONS = [...]string{
+	ACTIVITIES_VIEW,
+	NOTIFICATIONS_RECEIVE,
+	GOOGLE_LOCATION_SEARCH,
+	MAP_VIEW,
+}

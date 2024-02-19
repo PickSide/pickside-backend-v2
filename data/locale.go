@@ -8,6 +8,7 @@ import (
 type Locale struct {
 	ID       uint64 `json:"id"`
 	Name     string `json:"name"`
+	Value    string `json:"value"`
 	FlagCode string `json:"flagCode"`
 }
 
@@ -28,6 +29,7 @@ func AllLocales() (*[]Locale, error) {
 		err := rows.Scan(
 			&locale.ID,
 			&locale.Name,
+			&locale.Value,
 			&locale.FlagCode,
 		)
 		if err != nil {

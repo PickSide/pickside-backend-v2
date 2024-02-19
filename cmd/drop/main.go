@@ -16,21 +16,21 @@ func main() {
 	defer db.CloseDB()
 
 	qs := []string{
-		queries.DropActivityTable,
-		queries.DropActivityUserTable,
-		queries.DropChatroomParticipantsTable,
-		queries.DropChatroomTable,
-		queries.DropGameModesTable,
-		queries.DropGroupUsersTable,
-		queries.DropGroupTable,
-		queries.DropLocaleTable,
-		queries.DropMessageTable,
-		queries.DropNotificationTable,
-		queries.DropSportGameModesTable,
-		queries.DropSportTable,
-		queries.DropTokensTable,
-		queries.DropUserSettingsTable,
-		queries.DropUserTables,
+		queries.DropActivities,
+		queries.DropChatrooms,
+		queries.DropGameModes,
+		queries.DropGroups,
+		queries.DropLocales,
+		queries.DropMessage,
+		queries.DropNotifications,
+		queries.DropSports,
+		queries.DropTokens,
+		queries.DropUserSettings,
+		queries.DropUsers,
+		queries.DropActivityUsers,
+		queries.DropChatroomUsers,
+		queries.DropSportGameModes,
+		queries.DropGroupUsers,
 	}
 
 	for _, q := range qs {

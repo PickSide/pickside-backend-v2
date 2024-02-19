@@ -1,12 +1,5 @@
 package queries
 
-const CreateSportTable = `
-    CREATE TABLE IF NOT EXISTS sports (
-        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255),
-        feature_available BOOL
-    )
-`
 const SelectAllFromSports = `
     SELECT
         sgm.sport_id,

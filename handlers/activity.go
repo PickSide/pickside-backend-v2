@@ -77,9 +77,13 @@ func HandleParticipantsRegistration(g *gin.Context) {
 		return
 	}
 
-	ok := data.UpdateParticipants(req.ActivityId, req.UserId)
+	participants, ok := data.UpdateParticipants(req.ActivityId, req.UserId)
+	if !ok {
+		g.JSON(http.StatusInternalServerError, gin.H{"updated": false})
+		return
+	}
 
-	g.JSON(http.StatusCreated, gin.H{"updated": ok})
+	g.JSON(http.StatusOK, gin.H{"result": participants})
 	return
 }
 

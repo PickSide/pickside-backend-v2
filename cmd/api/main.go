@@ -6,6 +6,7 @@ import (
 	"pickside/service/db"
 	"pickside/service/handlers"
 	"pickside/service/middlewares"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -23,7 +24,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	g.Use(cors.Default())
+	g.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://127.0.0.1:3000", "http://localhost:3000", "https://pickside.net"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowHeaders:     []string{"Origin", "X-Request-Id", "Content-Type"},
+		AllowWebSockets:  true,
+		ExposeHeaders:    []string{"X-Request-Id", "Content-Type", "Content-Length", "Content-Encoding"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	v2 := g.Group("/api/v2", middlewares.FromValidDomain())
 
 	//activities
@@ -44,15 +54,16 @@ func main() {
 	v2.GET("/sports", handlers.HandleGetAllSports)
 
 	v2.GET("/me", middlewares.WithToken(), handlers.HandleMe)
-	v2.GET("/me-settings", middlewares.WithToken(), handlers.HandleMeSettings)
-	v2.GET("/logout", handlers.HandleLogout)
+	v2.POST("/logout", handlers.HandleLogout)
 	v2.POST("/login", handlers.HandleLogin)
 	v2.POST("/google-login", handlers.HandleLoginWithGoogle)
 
 	// user
+	v2.GET("/users/:userId/settings", middlewares.WithToken(), handlers.HandleGetSettings)
+	v2.POST("/users", handlers.HandleCreateUser)
+	v2.POST("/users/:userId/activity", handlers.HandleCreateUser)
+	v2.PUT("/users/:userId/settings", middlewares.WithToken(), handlers.HandleUpdateSettings)
 	v2.PUT("/users/:userId/activities/:activityId/favorites", middlewares.WithToken(), handlers.HandleUpdateFavorites)
-	v2.POST("/users", handlers.HandleCreateMe)
-	v2.POST("/users/:userId/activity", handlers.HandleCreateMe)
 
 	err := g.Run(os.Getenv("LISTEN_PORT"))
 

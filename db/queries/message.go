@@ -1,17 +1,5 @@
 package queries
 
-const CreateMessageTable = `
-    CREATE TABLE IF NOT EXISTS messages (
-        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        content TEXT,
-        delivered BOOL,
-        sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        chatroom_id BIGINT UNSIGNED,
-        sender_id BIGINT UNSIGNED,
-        INDEX chatroom_id_idx (chatroom_id),
-        INDEX sender_id_idx (sender_id)
-    )
-`
 const SelectAllFromMessageByChatroomId = `
     SELECT * 
     FROM messages

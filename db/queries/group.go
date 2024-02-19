@@ -1,21 +1,5 @@
 package queries
 
-const CreateGroupTable = `
-    CREATE TABLE IF NOT EXISTS groups (
-        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        cover_photo VARCHAR(255),
-        description VARCHAR(255),
-        name VARCHAR(255),
-        requires_approval BOOL DEFAULT 0,
-        visibility ENUM('public', 'private'),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        organizer_id BIGINT UNSIGNED,
-        sport_id BIGINT UNSIGNED,
-        INDEX organizer_id_idx (organizer_id),
-        INDEX sport_id_idx (sport_id)
-    )
-`
 const SelectGroupById = `
     SELECT * 
     FROM groups

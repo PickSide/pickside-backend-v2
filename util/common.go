@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"math/big"
 	"reflect"
 	"strconv"
 )
@@ -18,6 +19,22 @@ func GenerateRandomUsername(length int) (string, error) {
 	base64Encoded := base64.StdEncoding.EncodeToString(randomBytes)
 
 	return base64Encoded, nil
+}
+
+func GenerateRandomString(length int) (string, error) {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+	var result string
+	for i := 0; i < length; i++ {
+		randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		if err != nil {
+			return "", err
+		}
+
+		result += string(charset[randomIndex.Int64()])
+	}
+
+	return result, nil
 }
 
 func ConvertStringsToUint64Array(strArray []string) ([]uint64, error) {
