@@ -6,7 +6,7 @@ const CreateActivityTable = `
         address VARCHAR(255),
         date DATE,
         description VARCHAR(255),
-        is_private BOOL DEFAULT 0,
+        is_private BOOL,
         max_players INT,
         price FLOAT,
         rules VARCHAR(255),
@@ -43,7 +43,7 @@ const CreateGroupTable = `
         cover_photo VARCHAR(255),
         description VARCHAR(255),
         name VARCHAR(255),
-        requires_approval BOOL DEFAULT 0,
+        requires_approval BOOL,
         visibility ENUM('public', 'private'),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -77,7 +77,7 @@ const CreateNotificationTable = `
     CREATE TABLE IF NOT EXISTS notifications (
         id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         expires DATETIME,
-		is_read BOOL DEFAULT 0,
+		is_read BOOL,
 		message VARCHAR(255),
 		receiver_id BIGINT UNSIGNED,
 		sender_id BIGINT UNSIGNED,
@@ -97,25 +97,9 @@ const CreateTokensTable = `
 	CREATE TABLE IF NOT EXISTS tokens (
 		id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 		value VARCHAR(255),
-		is_black_listed BOOL DEFAULT 0,
+		is_black_listed BOOL,
 		associated_user_id BIGINT,
 		INDEX associated_user_id_idx (associated_user_id)
-	);
-`
-const CreateUserSettingsTable = `
-	CREATE TABLE IF NOT EXISTS user_settings (
-		id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-		allow_location_tracking BOOLEAN,
-		preferred_locale VARCHAR(255),
-		preferred_region VARCHAR(255),
-		preferred_sport VARCHAR(255),
-		preferred_theme VARCHAR(255),
-		show_age BOOLEAN,
-		show_email BOOLEAN,
-		show_groups BOOLEAN,
-		show_phone BOOLEAN,
-		user_id BIGINT,
-		INDEX user_id_idx (user_id)
 	);
 `
 const CreateUserTables = `
@@ -126,26 +110,34 @@ const CreateUserTables = `
 		bio VARCHAR(255) NULL,
 		city VARCHAR(255) NULL,
 		email VARCHAR(255),
-		email_verified BOOL DEFAULT 0,
-		full_name VARCHAR(255),
-		favorites VARCHAR(255) NULL,
-		is_inactive BOOL DEFAULT 0,
+		email_verified BOOL,
+		full_name VARCHAR(255) NULL,
+		favorites VARCHAR(255),
+		is_inactive BOOL,
 		inactive_date TIMESTAMP,
 		join_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		locale_region VARCHAR(255) NULL,
-		match_organized_count INT DEFAULT 0,
-		match_played_count INT DEFAULT 0,
+		match_organized_count INT,
+		match_played_count INT,
 		password VARCHAR(255),
 		permissions VARCHAR(255),
 		phone VARCHAR(255) NULL,
-		reliability FLOAT,
+		reliability INT,
 		role ENUM('admin', 'user'),
 		sexe ENUM('male', 'female') DEFAULT 'male',
 		timezone VARCHAR(255) NULL,
 		username VARCHAR(255),
-		agreed_to_terms BOOL DEFAULT 1
+		agreed_to_terms BOOL,
+        allow_location_tracking BOOL,
+		preferred_locale VARCHAR(255),
+		preferred_region VARCHAR(255),
+		preferred_sport VARCHAR(255),
+		preferred_theme VARCHAR(255),
+		show_age BOOL,
+		show_email BOOL,
+		show_groups BOOL,
+		show_phone BOOL
 	);
-
 `
 
 /** LINK TABLE **/

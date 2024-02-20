@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"pickside/service/util"
@@ -36,7 +35,6 @@ func WithToken() gin.HandlerFunc {
 
 		accessToken, err := g.Cookie("accessToken")
 		if err != nil {
-			log.Println("if err != nil")
 			token, err := util.GenerateAccess(uint64(userClaims.ID), userClaims.Username, userClaims.Email, userClaims.EmailVerified)
 			if err != nil {
 				g.JSON(http.StatusInternalServerError, err.Error())
@@ -58,7 +56,6 @@ func WithToken() gin.HandlerFunc {
 		if !util.IsTokenValid(accessToken) {
 			token, err := util.GenerateAccess(uint64(userClaims.ID), userClaims.Username, userClaims.Email, userClaims.EmailVerified)
 			if err != nil {
-				log.Println(err.Error())
 				g.JSON(http.StatusInternalServerError, err.Error())
 				g.Abort()
 				return

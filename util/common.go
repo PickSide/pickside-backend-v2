@@ -6,7 +6,9 @@ import (
 	"errors"
 	"math/big"
 	"reflect"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 func GenerateRandomUsername(length int) (string, error) {
@@ -88,4 +90,13 @@ func Uint64Includes(unint64Array []uint64, value uint64) bool {
 func Remove(s []int, i int) []int {
 	s[i] = s[len(s)-1]
 	return s[:len(s)-1]
+}
+
+func CamelToSnake(s string) string {
+	var re = regexp.MustCompile("([a-z0-9])([A-Z])")
+	snake := re.ReplaceAllString(s, "${1}_${2}")
+
+	snake = strings.ToLower(snake)
+
+	return snake
 }

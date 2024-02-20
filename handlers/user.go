@@ -223,27 +223,6 @@ func HandleUpdateFavorites(g *gin.Context) {
 	return
 }
 
-func HandleGetSettings(g *gin.Context) {
-	userIdString := g.Params.ByName("userId")
-
-	userId, err := strconv.ParseUint(userIdString, 10, 64)
-	if err != nil {
-		g.JSON(http.StatusNotFound, err.Error())
-		return
-	}
-
-	result, err := data.GetUserSettings(userId)
-	if err != nil {
-		g.JSON(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	g.JSON(http.StatusOK, gin.H{
-		"result": result,
-	})
-	return
-}
-
 func HandleUpdateSettings(g *gin.Context) {
 	userIdString := g.Params.ByName("userId")
 
@@ -253,21 +232,21 @@ func HandleUpdateSettings(g *gin.Context) {
 		return
 	}
 
-	var settings data.UserSettings
+	var settings map[string]interface{}
 
 	if err := g.ShouldBindJSON(&settings); err != nil {
 		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	result, err := data.UpdateUserSettings(userId, settings)
+	err = data.UpdateSettings(userId, settings)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	g.JSON(http.StatusOK, gin.H{
-		"result": result,
+		"message": "succesfully updated",
 	})
 	return
 }

@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +19,6 @@ func FromValidDomain() gin.HandlerFunc {
 				break
 			}
 		}
-		log.Println(isValidDomain)
 
 		if !isValidDomain {
 			g.String(http.StatusForbidden, "invalid domain")

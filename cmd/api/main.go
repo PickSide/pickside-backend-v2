@@ -59,7 +59,6 @@ func main() {
 	v2.POST("/google-login", handlers.HandleLoginWithGoogle)
 
 	// user
-	v2.GET("/users/:userId/settings", middlewares.WithToken(), handlers.HandleGetSettings)
 	v2.POST("/users", handlers.HandleCreateUser)
 	v2.POST("/users/:userId/activity", handlers.HandleCreateUser)
 	v2.PUT("/users/:userId/settings", middlewares.WithToken(), handlers.HandleUpdateSettings)

@@ -2,7 +2,6 @@ package data
 
 import (
 	"database/sql"
-	"log"
 	"pickside/service/db"
 	"pickside/service/db/queries"
 	"pickside/service/types"
@@ -47,7 +46,6 @@ func UpdateParticipants(activityId uint64, userId uint64) (*[]Participant, bool)
 
 	participants, err := getParticipants(dbInstance, activityId)
 	if err != nil {
-		log.Println("Error fetching participants:", err)
 		return nil, false
 	}
 

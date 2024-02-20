@@ -51,7 +51,6 @@ func CreateTables() {
 		queries.CreateSportGameModesTable,
 		queries.CreateSportTable,
 		queries.CreateTokensTable,
-		queries.CreateUserSettingsTable,
 		queries.CreateUserTables,
 	}
 
@@ -149,77 +148,54 @@ func PopulateTables() {
 	var users []data.User
 
 	for _, user := range usersData {
-		bio := "My bio"
-		city := "Montreal"
-		localeRegion := "montreal"
-		phone := "514-123-45679"
-		timezone := location.String()
-		reliability := 50
-
 		users = append(users, data.User{
-			AccountType:         types.DEFAULT,
-			Avatar:              nil,
-			Bio:                 &bio,
-			City:                &city,
-			Password:            string(hashPassword),
-			EmailVerified:       true,
-			FullName:            user.FullName,
-			Favorites:           nil,
-			Email:               user.Email,
-			Username:            user.Username,
-			IsInactive:          false,
-			InactiveDate:        nil,
-			JoinDate:            time.Now(),
-			LocaleRegion:        &localeRegion,
-			MatchOrganizedCount: 0,
-			MatchPlayedCount:    0,
-			Permissions:         strings.Join(types.DEFAULT_PERMISSIONS[:], ","),
-			Phone:               &phone,
-			Reliability:         &reliability,
-			Role:                types.USER,
-			Sexe:                types.MALE,
-			Timezone:            &timezone,
-		})
-	}
-
-	for i, user := range users {
-		_, err := db.GetDB().Exec(queries.InsertUserSeed,
-			user.AccountType, user.Avatar, user.Bio, user.City, user.Email, user.EmailVerified, user.FullName, user.Favorites, user.IsInactive,
-			user.InactiveDate, user.JoinDate, user.LocaleRegion, user.MatchOrganizedCount, user.MatchPlayedCount,
-			user.Password, user.Permissions, user.Phone, user.Reliability, user.Role, user.Sexe, user.Timezone, user.Username, true,
-		)
-		if err != nil {
-			panic(err)
-		}
-
-		settings := data.UserSettings{
+			AccountType:           types.DEFAULT,
+			AgreedToTerms:         true,
 			AllowLocationTracking: false,
+			Avatar:                "",
+			Bio:                   "my bio",
+			City:                  "montreal",
+			Email:                 user.Email,
+			EmailVerified:         true,
+			Favorites:             "",
+			FullName:              user.FullName,
+			InactiveDate:          nil,
+			IsInactive:            false,
+			JoinDate:              time.Now(),
+			LocaleRegion:          "montreal",
+			MatchOrganizedCount:   0,
+			MatchPlayedCount:      0,
+			Password:              string(hashPassword),
+			Permissions:           strings.Join(types.DEFAULT_PERMISSIONS[:], ","),
+			Phone:                 "514-123-45679",
 			PreferredLocale:       "en",
 			PreferredRegion:       "soccer",
 			PreferredSport:        "light",
 			PreferredTheme:        "montreal",
+			Reliability:           50,
+			Role:                  types.USER,
+			Sexe:                  types.MALE,
 			ShowAge:               true,
 			ShowEmail:             true,
 			ShowGroups:            false,
 			ShowPhone:             false,
-		}
+			Timezone:              location.String(),
+			Username:              user.Username,
+		})
+	}
 
-		_, err = db.GetDB().Exec(queries.InsertUserSetting,
-			settings.AllowLocationTracking,
-			settings.PreferredLocale,
-			settings.PreferredRegion,
-			settings.PreferredSport,
-			settings.PreferredTheme,
-			settings.ShowAge,
-			settings.ShowEmail,
-			settings.ShowGroups,
-			settings.ShowPhone,
-			uint64(i+1),
+	for _, user := range users {
+		_, err := db.GetDB().Exec(queries.InsertUserSeed,
+			user.AccountType, true, user.AllowLocationTracking, user.Avatar, user.Bio, user.City, user.Email, user.EmailVerified, user.Favorites,
+			user.FullName, user.InactiveDate, user.IsInactive, user.JoinDate, user.LocaleRegion, user.MatchOrganizedCount, user.MatchPlayedCount,
+			user.Password, user.Permissions, user.Phone, user.PreferredLocale, user.PreferredRegion, user.PreferredSport, user.PreferredTheme,
+			user.Reliability, user.Role, user.Sexe, user.ShowAge, user.ShowEmail, user.ShowGroups, user.ShowPhone, user.Timezone, user.Username,
 		)
 		if err != nil {
 			panic(err)
 		}
 	}
+
 	activitiesData := []data.Activity{
 		{Address: "123 rue du 33", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 11, Price: 0, Rules: "No tackles", OrganizerID: 1, Time: time.Now().Format("15:04:05"), Title: "Activity A", SportID: 1},
 		{Address: "123 rue du 34", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 22, Price: 5, Rules: "No tackles", OrganizerID: 2, Time: time.Now().Format("15:04:05"), Title: "Activity B", SportID: 1},

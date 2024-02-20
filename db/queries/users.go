@@ -2,10 +2,11 @@ package queries
 
 const InsertUserSeed = `
 	INSERT INTO users (
-		account_type, avatar, bio, city, email, email_verified, full_name, favorites, is_inactive,
-		inactive_date, join_date, locale_region, match_organized_count, match_played_count,
-		password, permissions, phone, reliability, role, sexe, timezone, username, agreed_to_terms
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		account_type, agreed_to_terms, allow_location_tracking, avatar, bio, city, email, email_verified, favorites,
+		full_name, inactive_date, is_inactive, join_date, locale_region, match_organized_count, match_played_count,
+		password, permissions, phone, preferred_locale, preferred_region, preferred_sport, preferred_theme,
+		reliability, role, sexe, show_age, show_email, show_groups, show_phone, timezone, username
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 const InsertUser = `
 	INSERT INTO users (
@@ -22,37 +23,23 @@ const InsertUser = `
 		username
 	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
-const InsertUserSetting = `
-	INSERT INTO user_settings (
-		allow_location_tracking,
-		preferred_locale,
-		preferred_region,
-		preferred_sport,
-		preferred_theme,
-		show_age,
-		show_email,
-		show_groups,
-		show_phone,
-		user_id
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-`
 const SelectUserByEmail = `
 	SELECT 
-		id, account_type, avatar, bio, city, email,
-		email_verified,	full_name, favorites, is_inactive, inactive_date,
-		join_date, locale_region, match_organized_count, 
-		match_played_count, permissions, phone, reliability,
-		role, sexe, timezone, username, agreed_to_terms
+		id, account_type, agreed_to_terms, allow_location_tracking, avatar, bio, city, email, 
+		email_verified, full_name, favorites, is_inactive, inactive_date, join_date, 
+		locale_region, match_organized_count, match_played_count, password, 
+		permissions, phone, preferred_locale, preferred_region, preferred_sport, preferred_theme, 
+		reliability, role, sexe, show_age, show_email, show_groups, show_phone, timezone, username
 	FROM users 
 	WHERE email = ?
 `
 const SelectUserById = `
 	SELECT 
-		id, account_type, avatar, bio, city, email,
-		email_verified,	full_name, favorites, is_inactive, inactive_date,
-		join_date, locale_region, match_organized_count, 
-		match_played_count, permissions, phone, reliability,
-		role, sexe, timezone, username, agreed_to_terms
+		id, account_type, agreed_to_terms, allow_location_tracking, avatar, bio, city, email, 
+		email_verified, full_name, favorites, is_inactive, inactive_date, join_date, 
+		locale_region, match_organized_count, match_played_count, password, 
+		permissions, phone, preferred_locale, preferred_region, preferred_sport, preferred_theme, 
+		reliability, role, sexe, show_age, show_email, show_groups, show_phone, timezone, username
 	FROM users 
 	WHERE id = ?
 `
@@ -63,11 +50,11 @@ const SelectPasswordOnly = `
 `
 const SelectByUsername = `
 	SELECT 
-    	id, account_type, avatar, bio, city, email,
-		email_verified,	full_name, favorites, is_inactive, inactive_date,
-		join_date, locale_region, match_organized_count, 
-		match_played_count, permissions, phone, reliability,
-		role, sexe, timezone, username, agreed_to_terms
+		id, account_type, agreed_to_terms, allow_location_tracking, avatar, bio, city, email, 
+		email_verified, full_name, favorites, is_inactive, inactive_date, join_date, 
+		locale_region, match_organized_count, match_played_count, password, 
+		permissions, phone, preferred_locale, preferred_region, preferred_sport, preferred_theme, 
+		reliability, role, sexe, show_age, show_email, show_groups, show_phone, timezone, username
 	FROM users
 	WHERE username = ?
 `
@@ -75,32 +62,4 @@ const SelectFavorites = `
 	SELECT favorites
 	FROM users
 	WHERE id = ?
-`
-const SelectUserSetting = `
-	SELECT 
-		allow_location_tracking,
-		preferred_locale,
-		preferred_region,
-		preferred_sport,
-		preferred_theme,
-		show_age,
-		show_email,
-		show_groups,
-		show_phone
-	FROM user_settings
-	WHERE user_id = ?
-`
-const UpdateSettings = `
-	UPDATE user_settings
-	SET
-		allow_location_tracking = ?,
-		preferred_locale = ?,
-		preferred_region = ?,
-		preferred_sport = ?,
-		preferred_theme = ?,
-		show_age = ?,
-		show_email = ?,
-		show_groups = ?,
-		show_phone = ?
-	WHERE user_id = ?
 `

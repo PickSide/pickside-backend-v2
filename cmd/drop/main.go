@@ -25,7 +25,6 @@ func main() {
 		queries.DropNotifications,
 		queries.DropSports,
 		queries.DropTokens,
-		queries.DropUserSettings,
 		queries.DropUsers,
 		queries.DropActivityUsers,
 		queries.DropChatroomUsers,
