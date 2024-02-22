@@ -10,6 +10,7 @@ import (
 
 type Participant struct {
 	ID                  uint64     `json:"id"`
+	ActivityID          string     `json:"activityId"`
 	Avatar              string     `json:"avatar"`
 	Bio                 string     `json:"bio"`
 	City                string     `json:"city"`

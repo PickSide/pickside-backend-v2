@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"pickside/service/data"
@@ -16,12 +18,13 @@ import (
 )
 
 type CreateUserRequest struct {
-	FullName      string `binding:"required"`
-	Email         string `binding:"required" validate:"required,email"`
-	Password      string `binding:"required" validate:"required,min=8"`
-	Phone         string `binding:"required"`
-	AgreedToTerms bool   `binding:"required"`
+	AgreedToTerms bool   `json:"agreedToTerms" binding:"required"`
+	Email         string `json:"email" binding:"required" validate:"required,email"`
+	FullName      string `json:"fullName" binding:"required"`
+	Password      string `json:"password" binding:"required" validate:"required,min=8"`
+	Phone         string `json:"phone" binding:"required"`
 }
+
 type Me struct {
 	ID   uuid.UUID `json:"id"`
 	User data.User `json:"user"`
@@ -53,7 +56,17 @@ func HandleCreateUser(g *gin.Context) {
 		return
 	}
 
-	user, err := data.NewUser(req.FullName, req.Email, req.Password, req.Phone, req.AgreedToTerms, types.DEFAULT)
+	newUser := data.CreateUserStruct{
+		AccountType:   types.DEFAULT,
+		AgreedToTerms: true,
+		Email:         req.Email,
+		FullName:      req.FullName,
+		Locale:        "en",
+		Password:      []byte(req.Password),
+		Phone:         req.Phone,
+	}
+
+	user, err := data.NewUser(newUser)
 	if err != nil {
 		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -78,7 +91,7 @@ func HandleMe(g *gin.Context) {
 		return
 	}
 
-	user, err := data.MatchById(parsedToken.ID)
+	user, err := data.MatchId(parsedToken.ID)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -97,14 +110,26 @@ type AuthenticationRequest struct {
 func HandleLogin(g *gin.Context) {
 	var authRequest AuthenticationRequest
 
-	if err := g.ShouldBindJSON(&authRequest); err != nil {
+	var user *data.User
+	var err error
+
+	if err = g.ShouldBindJSON(&authRequest); err != nil {
 		g.JSON(http.StatusBadRequest, gin.H{"error": errors.New("bad payload").Error()})
 		return
 	}
 
-	user, err := data.MatchUser(authRequest.Username, authRequest.Password)
+	isEmail := util.IsEmail(authRequest.Username)
+
+	if isEmail {
+		email := authRequest.Username
+		user, err = data.MatchEmail(email, authRequest.Password)
+	} else {
+		user, err = data.MatchUsername(authRequest.Username, authRequest.Password)
+	}
 	if err != nil {
-		g.JSON(http.StatusNotFound, err.Error())
+		g.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -118,6 +143,7 @@ func HandleLogin(g *gin.Context) {
 
 type LoginWithGoogleRequest struct {
 	Email         string `json:"email" binding:"required"`
+	GoogleID      string `json:"id" binding:"required"`
 	Locale        string `json:"locale" binding:"required"`
 	Name          string `json:"name" binding:"required"`
 	Picture       string `json:"picture" binding:"omitempty"`
@@ -132,7 +158,20 @@ func HandleLoginWithGoogle(g *gin.Context) {
 		return
 	}
 
-	user, err := data.MatchUserByEmail(req.Email, req.Locale, req.Name, req.Picture, req.VerifiedEmail, types.GOOGLE)
+	log.Println("GoogleID", req.GoogleID)
+
+	user, err := data.MatchExternalId(req.GoogleID)
+	if err != nil && err == sql.ErrNoRows {
+		user, err = data.NewUser(data.CreateUserStruct{
+			AccountType:   types.GOOGLE,
+			Email:         req.Email,
+			EmailVerified: req.VerifiedEmail,
+			ExternalID:    req.GoogleID,
+			FullName:      req.Name,
+			Locale:        req.Locale,
+			Picture:       req.Picture,
+		})
+	}
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -252,6 +291,7 @@ func HandleUpdateSettings(g *gin.Context) {
 }
 
 func generateTokens(g *gin.Context, user *data.User) {
+	log.Println(user)
 	refreshToken, err := util.GenerateRefresh(user.ID, user.Username, user.Email, user.EmailVerified)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, err)

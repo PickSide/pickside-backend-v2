@@ -42,7 +42,7 @@ func HandleCreateActivity(g *gin.Context) {
 		return
 	}
 
-	result, err := data.InsertActivity(
+	result, err := data.CreateActivity(
 		req.Address,
 		req.Date,
 		req.MaxPlayers,

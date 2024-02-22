@@ -2,11 +2,11 @@ package queries
 
 const InsertUserSeed = `
 	INSERT INTO users (
-		account_type, agreed_to_terms, allow_location_tracking, avatar, bio, city, email, email_verified, favorites,
+		account_type, agreed_to_terms, allow_location_tracking, avatar, bio, city, email, email_verified, external_id, favorites,
 		full_name, inactive_date, is_inactive, join_date, locale_region, match_organized_count, match_played_count,
 		password, permissions, phone, preferred_locale, preferred_region, preferred_sport, preferred_theme,
 		reliability, role, sexe, show_age, show_email, show_groups, show_phone, timezone, username
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 const InsertUser = `
 	INSERT INTO users (

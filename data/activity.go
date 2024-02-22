@@ -46,7 +46,7 @@ func AllActivities() (*[]Activity, error) {
 	return &activities, nil
 }
 
-func InsertActivity(address string, date string, maxPlayers int, description string, organizerId int64, price float32, rules string, time string, title string, isPrivate bool, sportId uint64) (*Activity, error) {
+func CreateActivity(address string, date string, maxPlayers int, description string, organizerId int64, price float32, rules string, time string, title string, isPrivate bool, sportId uint64) (*Activity, error) {
 	dbInstance := db.GetDB()
 
 	tx, err := dbInstance.Begin()

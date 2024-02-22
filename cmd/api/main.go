@@ -60,7 +60,6 @@ func main() {
 
 	// user
 	v2.POST("/users", handlers.HandleCreateUser)
-	v2.POST("/users/:userId/activity", handlers.HandleCreateUser)
 	v2.PUT("/users/:userId/settings", middlewares.WithToken(), handlers.HandleUpdateSettings)
 	v2.PUT("/users/:userId/activities/:activityId/favorites", middlewares.WithToken(), handlers.HandleUpdateFavorites)
 

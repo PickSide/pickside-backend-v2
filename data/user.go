@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"pickside/service/db"
@@ -20,17 +21,18 @@ type User struct {
 	AccountType           types.AccountType `json:"accountType,omitempty"`
 	AgreedToTerms         bool              `json:"agreedToTerms"`
 	AllowLocationTracking bool              `json:"allowLocationTracking"`
-	Avatar                string            `json:"avatar,omitempty"`
-	Bio                   string            `json:"bio,omitempty"`
-	City                  string            `json:"city,omitempty"`
-	Email                 string            `json:"email,omitempty"`
+	Avatar                *string           `json:"avatar,omitempty"`
+	Bio                   *string           `json:"bio,omitempty"`
+	City                  *string           `json:"city,omitempty"`
+	Email                 string            `json:"email"`
 	EmailVerified         bool              `json:"emailVerified"`
-	Favorites             string            `json:"favorites,omitempty"`
+	ExternalID            *string           `json:"externalId"`
+	Favorites             *string           `json:"favorites,omitempty"`
 	FullName              string            `json:"fullName,omitempty"`
 	InactiveDate          *time.Time        `json:"inactiveDate,omitempty"`
 	IsInactive            bool              `json:"isInactive"`
 	JoinDate              time.Time         `json:"joinDate,omitempty"`
-	LocaleRegion          string            `json:"localeRegion,omitempty"`
+	LocaleRegion          *string           `json:"localeRegion,omitempty"`
 	MatchOrganizedCount   int               `json:"matchOrganizedCount"`
 	MatchPlayedCount      int               `json:"matchPlayedCount"`
 	Password              string            `json:"-"`
@@ -51,59 +53,51 @@ type User struct {
 	Username              string            `json:"username,omitempty"`
 }
 
-func MatchUser(username string, password string) (*User, error) {
+type MatchUserStruct struct {
+	Username string
+	Password string
+}
+
+func MatchUsername(username string, password string) (*User, error) {
 	dbInstance := db.GetDB()
 
-	hashedPwd, err := getPasswordFromDB(dbInstance, username)
-	if err != nil {
-		return nil, err
-	}
-
-	err = comparePasswords(hashedPwd, password)
-	if err != nil {
-		return nil, err
+	match := passwordMatch(dbInstance, "username", username, password)
+	log.Println("MatchUsername - match", match)
+	if !match {
+		return nil, errors.New("Username or email is incorrect")
 	}
 
 	user, err := getUserDetails(dbInstance, "username", username)
 
-	return user, nil
+	return user, err
 }
 
-func MatchUserByEmail(email string, locale string, fullName string, picture string, verifiedEmail bool, accountType types.AccountType) (*User, error) {
-	dbInstance := db.GetDB()
-
-	randomStr, err := util.GenerateRandomString(5)
-	if err != nil {
-		return nil, err
-	}
-
-	hashedRandomPwd, err := bcrypt.GenerateFromPassword([]byte(randomStr), 10)
-	if err != nil {
-		return nil, err
-	}
-
-	user, err := getUserDetails(dbInstance, "email", email)
-	if err != nil && err == sql.ErrNoRows {
-		user, err = createUser(dbInstance, CreateUserStruct{
-			AccountType:   accountType,
-			AgreedToTerms: true,
-			Avatar:        picture,
-			Email:         email,
-			EmailVerified: verifiedEmail,
-			FullName:      fullName,
-			Password:      hashedRandomPwd,
-		})
-	} else if err != nil {
-		return nil, err
-	}
-
-	return user, nil
+type MatchEmailStruct struct {
+	Email    string
+	Password string
 }
 
-func MatchById(userId uint64) (*User, error) {
+func MatchEmail(email string, password string) (*User, error) {
 	dbInstance := db.GetDB()
 
-	user, err := getUserDetails(dbInstance, "id", userId)
+	var user *User
+	var err error
+
+	if passwordMatch(dbInstance, "email", email, password) {
+		user, err = getUserDetails(dbInstance, "email", email)
+	}
+
+	return user, err
+}
+
+func MatchExternalCreds() {
+
+}
+
+func MatchId(id uint64) (*User, error) {
+	dbInstance := db.GetDB()
+
+	user, err := getUserDetails(dbInstance, "id", id)
 	if err != nil {
 		return nil, err
 	}
@@ -111,22 +105,28 @@ func MatchById(userId uint64) (*User, error) {
 	return user, nil
 }
 
-func NewUser(email string, locale string, fullName string, password string, verifiedEmail bool, accountType types.AccountType) (*User, error) {
+func MatchExternalId(id string) (*User, error) {
 	dbInstance := db.GetDB()
 
-	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	user, err := getUserDetails(dbInstance, "external_id", id)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := createUser(dbInstance, CreateUserStruct{
-		AccountType:   types.DEFAULT,
-		AgreedToTerms: true,
-		Email:         email,
-		EmailVerified: verifiedEmail,
-		FullName:      fullName,
-		Password:      hashedPwd,
-	})
+	return user, nil
+}
+
+func NewUser(fields CreateUserStruct) (*User, error) {
+	dbInstance := db.GetDB()
+
+	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(fields.Password), 10)
+	if err != nil {
+		return nil, err
+	}
+
+	fields.Password = hashedPwd
+
+	user, err := createUser(dbInstance, fields)
 	if err != nil {
 		return nil, err
 	}
@@ -206,35 +206,45 @@ func UpdateSettings(userId uint64, settings map[string]interface{}) error {
 	return err
 }
 
-func getPasswordFromDB(dbInstance *sql.DB, username string) (string, error) {
+func passwordMatch(dbInstance *sql.DB, queryBy string, value any, unhashedPassword string) bool {
 	var hashedPwd string
-	err := dbInstance.QueryRow(queries.SelectPasswordOnly, username).Scan(&hashedPwd)
-	return hashedPwd, err
+
+	selectClause := fmt.Sprintf(`
+		SELECT password 
+		FROM users
+		WHERE %s = ?
+	`, queryBy)
+
+	err := dbInstance.QueryRow(selectClause, value).Scan(&hashedPwd)
+	if err != nil {
+		return false
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPwd), []byte(unhashedPassword))
+	if err != nil {
+		return false
+	}
+
+	return true
 }
 
-func comparePasswords(hashedPwd, password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPwd), []byte(password))
-}
-
-func getUserDetails(dbInstance *sql.DB, byQuery string, value any) (*User, error) {
+func getUserDetails(dbInstance *sql.DB, queryBy string, value any) (*User, error) {
 	var user User
 
 	selectClause := fmt.Sprintf(`
 		SELECT 
 			id, account_type, agreed_to_terms, allow_location_tracking, avatar, bio, city, email, 
-			email_verified, full_name, favorites, is_inactive, inactive_date, join_date, 
+			email_verified, external_id, full_name, favorites, is_inactive, inactive_date, join_date, 
 			locale_region, match_organized_count, match_played_count, password, 
 			permissions, phone, preferred_locale, preferred_region, preferred_sport, preferred_theme, 
 			reliability, role, sexe, show_age, show_email, show_groups, show_phone, timezone, username
 		FROM users
 		WHERE %s = ?
-	`, byQuery)
-
-	log.Println(selectClause)
+	`, queryBy)
 
 	err := dbInstance.QueryRow(selectClause, value).Scan(
 		&user.ID, &user.AccountType, &user.AgreedToTerms, &user.AllowLocationTracking, &user.Avatar, &user.Bio, &user.City, &user.Email,
-		&user.EmailVerified, &user.FullName, &user.Favorites, &user.IsInactive, &user.InactiveDate, &user.JoinDate,
+		&user.EmailVerified, &user.ExternalID, &user.FullName, &user.Favorites, &user.IsInactive, &user.InactiveDate, &user.JoinDate,
 		&user.LocaleRegion, &user.MatchOrganizedCount, &user.MatchPlayedCount, &user.Password,
 		&user.Permissions, &user.Phone, &user.PreferredLocale, &user.PreferredRegion, &user.PreferredSport, &user.PreferredTheme,
 		&user.Reliability, &user.Role, &user.Sexe, &user.ShowAge, &user.ShowEmail, &user.ShowGroups, &user.ShowPhone, &user.Timezone, &user.Username,
@@ -329,7 +339,9 @@ type CreateUserStruct struct {
 	Avatar        string
 	Email         string
 	EmailVerified bool
+	ExternalID    string
 	FullName      string
+	Locale        string
 	Password      []byte
 	Phone         string
 	Picture       string
@@ -337,12 +349,28 @@ type CreateUserStruct struct {
 }
 
 func createUser(dbInstance *sql.DB, fields CreateUserStruct) (*User, error) {
-	result, err := dbInstance.Exec(queries.InsertUser,
+	result, err := dbInstance.Exec(`
+			INSERT INTO users (
+				account_type, 
+				agreed_to_terms,
+				avatar,
+				email, 
+				email_verified, 
+				external_id,
+				full_name,
+				password, 
+				permissions, 
+				phone, 
+				role, 
+				username
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`,
 		fields.AccountType,
 		fields.AgreedToTerms,
 		fields.Avatar,
 		fields.Email,
 		fields.EmailVerified,
+		fields.ExternalID,
 		fields.FullName,
 		fields.Password,
 		strings.Join(types.DEFAULT_PERMISSIONS[:], ","),
@@ -359,17 +387,10 @@ func createUser(dbInstance *sql.DB, fields CreateUserStruct) (*User, error) {
 		return nil, err
 	}
 
-	var insertedUser User
+	insertedUser, err := getUserDetails(dbInstance, "id", lastInsertID)
 
-	err = dbInstance.QueryRow(
-		queries.SelectUserById,
-		lastInsertID,
-	).Scan(
-		&insertedUser.ID, &insertedUser.AccountType, &insertedUser.Avatar, &insertedUser.Bio, &insertedUser.City, &insertedUser.Email,
-		&insertedUser.EmailVerified, &insertedUser.FullName, &insertedUser.Favorites, &insertedUser.IsInactive, &insertedUser.InactiveDate, &insertedUser.JoinDate,
-		&insertedUser.LocaleRegion, &insertedUser.MatchOrganizedCount, &insertedUser.MatchPlayedCount, &insertedUser.Permissions, &insertedUser.Phone,
-		&insertedUser.Reliability, &insertedUser.Role, &insertedUser.Sexe, &insertedUser.Timezone, &insertedUser.Username, &insertedUser.AgreedToTerms,
-	)
+	log.Println("createUser - lastInsertID", lastInsertID)
+	log.Println("createUser - insertedUser", insertedUser)
 
-	return &insertedUser, err
+	return insertedUser, err
 }
