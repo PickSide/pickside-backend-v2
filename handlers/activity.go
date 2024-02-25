@@ -21,17 +21,21 @@ func HandleGetAllActivities(g *gin.Context) {
 }
 
 type CreateActivityRequest struct {
-	Address     string  `json:"address" binding:"required"`
-	Date        string  `json:"date" binding:"required"`
-	MaxPlayers  int     `json:"maxPlayers" binding:"required"`
-	Description string  `json:"description"`
-	OrganizerID int64   `json:"organizerId" binding:"required"`
-	Price       float32 `json:"price" binding:"omitempty"`
-	Rules       string  `json:"rules"`
-	Time        string  `json:"time" binding:"required"`
-	Title       string  `json:"title" binding:"required"`
-	IsPrivate   bool    `json:"isPrivate"`
-	SportID     uint64  `json:"sportId" binding:"required"`
+	Address     string   `json:"address" binding:"required"`
+	Date        string   `json:"date" binding:"required"`
+	Description string   `json:"description,omitempty"`
+	GameMode    string   `json:"gameMode" binding:"required"`
+	Images      []string `json:"images,omitempty"`
+	IsPrivate   bool     `json:"isPrivate"`
+	Lat         float32  `json:"lat,omitempty"`
+	Lng         float32  `json:"lng,omitempty"`
+	MaxPlayers  int      `json:"maxPlayers" binding:"required"`
+	OrganizerID uint64   `json:"organizerId" binding:"required"`
+	Price       float32  `json:"price,omitempty"`
+	Rules       string   `json:"rules,omitempty"`
+	SportID     uint64   `json:"sportId" binding:"required"`
+	Time        string   `json:"time" binding:"required"`
+	Title       string   `json:"title" binding:"required"`
 }
 
 func HandleCreateActivity(g *gin.Context) {
@@ -45,22 +49,29 @@ func HandleCreateActivity(g *gin.Context) {
 	result, err := data.CreateActivity(
 		req.Address,
 		req.Date,
-		req.MaxPlayers,
 		req.Description,
+		req.GameMode,
+		req.Images,
+		req.IsPrivate,
+		req.Lat,
+		req.Lng,
+		req.MaxPlayers,
 		req.OrganizerID,
 		req.Price,
 		req.Rules,
+		req.SportID,
 		req.Time,
 		req.Title,
-		req.IsPrivate,
-		req.SportID,
 	)
 	if err != nil {
 		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	g.JSON(http.StatusCreated, gin.H{"result": result})
+	g.JSON(http.StatusCreated, gin.H{
+		"message": "created successfully",
+		"result":  result,
+	})
 	return
 }
 

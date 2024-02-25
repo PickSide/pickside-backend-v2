@@ -46,6 +46,7 @@ func main() {
 	v2.GET("/groups/users/:organizerId", handlers.HandleGetAllGroupsByOrganizer)
 	v2.GET("/groups/:id", handlers.HandleGetGroups)
 	v2.POST("/groups", handlers.HandleCreateGroup)
+	v2.DELETE("/groups/:groupId/users/:organizerId", handlers.HandleDeleteGroup)
 
 	// locales
 	v2.GET("/locales", handlers.HandleGetAllLocales)
@@ -59,6 +60,7 @@ func main() {
 	v2.POST("/google-login", handlers.HandleLoginWithGoogle)
 
 	// user
+	v2.GET("/users", middlewares.WithToken(), handlers.HandleGetAllUsers)
 	v2.POST("/users", handlers.HandleCreateUser)
 	v2.PUT("/users/:userId/settings", middlewares.WithToken(), handlers.HandleUpdateSettings)
 	v2.PUT("/users/:userId/activities/:activityId/favorites", middlewares.WithToken(), handlers.HandleUpdateFavorites)

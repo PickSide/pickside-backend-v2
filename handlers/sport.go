@@ -10,7 +10,9 @@ import (
 func HandleGetAllSports(g *gin.Context) {
 	results, err := data.AllSports()
 	if err != nil {
-		g.JSON(http.StatusInternalServerError, err.Error())
+		g.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
 		return
 	}
 

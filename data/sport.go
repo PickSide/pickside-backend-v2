@@ -1,21 +1,27 @@
 package data
 
 import (
+	"database/sql"
 	"pickside/service/db"
-	"pickside/service/db/queries"
 )
 
 type Sport struct {
 	ID               uint64 `json:"id"`
 	Name             string `json:"name"`
 	FeatureAvailable bool   `json:"featureAvailable"`
-	GameMode         string `json:"gameMode"`
+	GameModes        string `json:"gameModes"`
 }
 
 func AllSports() (*[]Sport, error) {
 	dbInstance := db.GetDB()
 
-	rows, err := dbInstance.Query(queries.SelectAllFromSports)
+	sports, err := getAllSports(dbInstance)
+
+	return sports, err
+}
+
+func getAllSports(dbInstance *sql.DB) (*[]Sport, error) {
+	rows, err := dbInstance.Query("SELECT * FROM sports")
 	if err != nil {
 		return nil, err
 	}
@@ -29,8 +35,8 @@ func AllSports() (*[]Sport, error) {
 		err := rows.Scan(
 			&sport.ID,
 			&sport.Name,
+			&sport.GameModes,
 			&sport.FeatureAvailable,
-			&sport.GameMode,
 		)
 		if err != nil {
 			return nil, err
@@ -38,9 +44,24 @@ func AllSports() (*[]Sport, error) {
 
 		sports = append(sports, sport)
 	}
-	if err := rows.Err(); err != nil {
+
+	err = rows.Err()
+
+	return &sports, err
+}
+
+func getSportById(dbInstance *sql.DB, sportId uint64) (*Sport, error) {
+	var sport Sport
+
+	err := dbInstance.QueryRow(`SELECT * FROM sports WHERE id = ?`, sportId).Scan(
+		&sport.ID,
+		&sport.Name,
+		&sport.GameModes,
+		&sport.FeatureAvailable,
+	)
+	if err != nil {
 		return nil, err
 	}
 
-	return &sports, nil
+	return &sport, err
 }

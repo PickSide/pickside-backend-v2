@@ -18,7 +18,6 @@ func main() {
 	qs := []string{
 		queries.DropActivities,
 		queries.DropChatrooms,
-		queries.DropGameModes,
 		queries.DropGroups,
 		queries.DropLocales,
 		queries.DropMessage,
@@ -28,7 +27,6 @@ func main() {
 		queries.DropUsers,
 		queries.DropActivityUsers,
 		queries.DropChatroomUsers,
-		queries.DropSportGameModes,
 		queries.DropGroupUsers,
 	}
 

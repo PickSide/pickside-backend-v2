@@ -1,24 +1,28 @@
 package queries
 
 const SelectGroupById = `
-    SELECT * 
+    SELECT 
+        id,
+        description,
+        name,
+        organizer_id,
+        requires_approval,
+        sport_id,
+        visibility
     FROM groups
     WHERE id = ?
 `
 const SelectAllGroupsByOrganizer = `
     SELECT  
         g.id,
-        g.cover_photo,
         g.description,
         g.name,
-        g.requires_approval,
-        g.visibility,
-        g.created_at,
-        g.updated_at,
         g.organizer_id,
-        g.sport_id
+        g.requires_approval,
+        g.sport_id,
+        g.visibility
     FROM groups g
-    JOIN group_users gu ON g.id = gu.group_id
+    JOIN users_groups gu ON g.id = gu.group_id
     WHERE g.organizer_id = ?
 `
 const SelectAllFromGroupsById = `
@@ -33,11 +37,14 @@ const SelectAllGroupsBySportId = `
 `
 const InsertIntoGroup = `
     INSERT INTO groups (
-        cover_photo, description, 
-        name, requires_approval, visibility, 
-        organizer_id, sport_id
+        description, 
+        name, 
+        organizer_id, 
+        requires_approval, 
+        sport_id,
+        visibility 
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?)
 `
 const DeleteFromGroupById = `
     DELETE FROM groups

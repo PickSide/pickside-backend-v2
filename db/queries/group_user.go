@@ -2,23 +2,23 @@ package queries
 
 const SelectAllFromGroupUsersByGroupId = `
     SELECT * 
-    FROM group_users
+    FROM users_groups
     WHERE group_id = ?
 `
 const SelectAllFromGroupUsersByUserId = `
     SELECT * 
-    FROM group_users
+    FROM users_groups
     WHERE user_id = ?
 `
 const InsertIntoGroupUsers = `
-    INSERT INTO group_users (group_id, user_id)
+    INSERT INTO users_groups (group_id, user_id)
     VALUES (?, ?)
 `
 const DeleteFromGroupUsersByGroupId = `
-    DELETE FROM group_users
+    DELETE FROM users_groups
     WHERE group_id = ?
 `
 const DeleteFromGroupUsersByUserId = `
-    DELETE FROM group_users
+    DELETE FROM users_groups
     WHERE user_id = ?
 `

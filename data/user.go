@@ -19,22 +19,22 @@ import (
 type User struct {
 	ID                    uint64            `json:"id"`
 	AccountType           types.AccountType `json:"accountType,omitempty"`
-	AgreedToTerms         bool              `json:"agreedToTerms"`
+	AgreedToTerms         bool              `json:"agreedToTerms,omitempty"`
 	AllowLocationTracking bool              `json:"allowLocationTracking"`
 	Avatar                *string           `json:"avatar,omitempty"`
 	Bio                   *string           `json:"bio,omitempty"`
 	City                  *string           `json:"city,omitempty"`
-	Email                 string            `json:"email"`
-	EmailVerified         bool              `json:"emailVerified"`
-	ExternalID            *string           `json:"externalId"`
+	Email                 string            `json:"email,omitempty"`
+	EmailVerified         bool              `json:"emailVerified,omitempty"`
+	ExternalID            *string           `json:"externalId,omitempty"`
 	Favorites             *string           `json:"favorites,omitempty"`
 	FullName              string            `json:"fullName,omitempty"`
 	InactiveDate          *time.Time        `json:"inactiveDate,omitempty"`
-	IsInactive            bool              `json:"isInactive"`
+	IsInactive            bool              `json:"isInactive,omitempty"`
 	JoinDate              time.Time         `json:"joinDate,omitempty"`
 	LocaleRegion          *string           `json:"localeRegion,omitempty"`
-	MatchOrganizedCount   int               `json:"matchOrganizedCount"`
-	MatchPlayedCount      int               `json:"matchPlayedCount"`
+	MatchOrganizedCount   int               `json:"matchOrganizedCount,omitempty"`
+	MatchPlayedCount      int               `json:"matchPlayedCount,omitempty"`
 	Password              string            `json:"-"`
 	Permissions           string            `json:"permissions,omitempty"`
 	Phone                 string            `json:"phone,omitempty"`
@@ -42,13 +42,13 @@ type User struct {
 	PreferredRegion       string            `json:"preferredRegion,omitempty"`
 	PreferredSport        string            `json:"preferredSport,omitempty"`
 	PreferredTheme        string            `json:"preferredTheme,omitempty"`
-	Reliability           int               `json:"reliability"`
+	Reliability           int               `json:"reliability,omitempty"`
 	Role                  types.Role        `json:"role,omitempty"`
 	Sexe                  types.Sexe        `json:"sexe,omitempty"`
-	ShowAge               bool              `json:"showAge"`
-	ShowEmail             bool              `json:"showEmail"`
-	ShowGroups            bool              `json:"showGroups"`
-	ShowPhone             bool              `json:"showPhone"`
+	ShowAge               bool              `json:"showAge,omitempty"`
+	ShowEmail             bool              `json:"showEmail,omitempty"`
+	ShowGroups            bool              `json:"showGroups,omitempty"`
+	ShowPhone             bool              `json:"showPhone,omitempty"`
 	Timezone              string            `json:"timezone,omitempty"`
 	Username              string            `json:"username,omitempty"`
 }
@@ -56,6 +56,36 @@ type User struct {
 type MatchUserStruct struct {
 	Username string
 	Password string
+}
+
+func AllUsers() (*[]User, error) {
+	dbInstance := db.GetDB()
+
+	var users []User
+
+	rows, err := dbInstance.Query("SELECT id, avatar, email, full_name, username FROM users")
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var user User
+
+		err := rows.Scan(
+			&user.ID,
+			&user.Avatar,
+			&user.Email,
+			&user.FullName,
+			&user.Username,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+
+	return &users, nil
 }
 
 func MatchUsername(username string, password string) (*User, error) {
@@ -88,10 +118,6 @@ func MatchEmail(email string, password string) (*User, error) {
 	}
 
 	return user, err
-}
-
-func MatchExternalCreds() {
-
 }
 
 func MatchId(id uint64) (*User, error) {
@@ -142,14 +168,18 @@ func GetFavorites(userId uint64) (*[]Activity, error) {
 		return nil, err
 	}
 
-	favoritesStr := strings.Join(favorites, ",")
+	var activities []Activity
 
-	activities, err := getActivitiesByIds(dbInstance, favoritesStr)
-	if err != nil {
-		return nil, err
+	for _, fav := range favorites {
+		activity, err := getActivityById(dbInstance, fav)
+		if err != nil {
+			return nil, err
+		}
+
+		activities = append(activities, *activity)
 	}
 
-	return activities, nil
+	return &activities, nil
 }
 
 func UpdateFavorites(userId uint64, activityId uint64) (*string, error) {
@@ -280,29 +310,6 @@ func isFavorite(array []string, value string) int {
 	return -1
 }
 
-func getActivitiesByIds(dbInstance *sql.DB, activityIds string) (*[]Activity, error) {
-	activitiesId := strings.Split(activityIds, ",")
-
-	var activities []Activity
-
-	for _, activityId := range activitiesId {
-		var activity Activity
-
-		err := dbInstance.QueryRow(queries.SelectActivityById, activityId).Scan(
-			&activity.ID, &activity.Address, &activity.Date, &activity.Description, &activity.IsPrivate,
-			&activity.MaxPlayers, &activity.Price, &activity.Rules, &activity.Time, &activity.Title,
-			&activity.CreatedAt, &activity.UpdatedAt, &activity.OrganizerID, &activity.SportID,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		activities = append(activities, activity)
-	}
-
-	return &activities, nil
-}
-
 func updateUserSettings(dbInstance *sql.DB, userId uint64, settings *map[string]interface{}) error {
 	tx, err := dbInstance.Begin()
 	if err != nil {
@@ -388,9 +395,6 @@ func createUser(dbInstance *sql.DB, fields CreateUserStruct) (*User, error) {
 	}
 
 	insertedUser, err := getUserDetails(dbInstance, "id", lastInsertID)
-
-	log.Println("createUser - lastInsertID", lastInsertID)
-	log.Println("createUser - insertedUser", insertedUser)
 
 	return insertedUser, err
 }

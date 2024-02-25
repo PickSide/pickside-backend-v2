@@ -10,9 +10,11 @@ const SelectActivityById = `
     WHERE id = ?
 `
 const InsertActivity = `
-    INSERT 
-    INTO activities (address, date, description, is_private, max_players, price, rules, organizer_id, time, title, sport_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO activities (
+        address, date, description, game_mode, images, is_private, lat, 
+        lng, max_players, organizer_id, price, rules, sport_id, time, title
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 const SelectAllParticipants = `
     SELECT u.id, u.avatar, u.bio, u.city, u.email, u.full_name, u.join_date, u.locale_region, u.match_organized_count, u.match_played_count, u.sexe, u.username

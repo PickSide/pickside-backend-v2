@@ -42,13 +42,11 @@ func CreateTables() {
 		queries.CreateActivityUserTable,
 		queries.CreateChatroomParticipantsTable,
 		queries.CreateChatroomTable,
-		queries.CreateGameModesTable,
 		queries.CreateGroupUsersTable,
 		queries.CreateGroupTable,
 		queries.CreateLocaleTable,
 		queries.CreateMessageTable,
 		queries.CreateNotificationTable,
-		queries.CreateSportGameModesTable,
 		queries.CreateSportTable,
 		queries.CreateTokensTable,
 		queries.CreateUserTables,
@@ -78,49 +76,14 @@ func PopulateTables() {
 	}
 
 	sportsData := []data.Sport{
-		{Name: "soccer", FeatureAvailable: true},
-		{Name: "basketball", FeatureAvailable: false},
-		{Name: "tennis", FeatureAvailable: false},
-		{Name: "american_football", FeatureAvailable: false},
+		{Name: "soccer", GameModes: "5 aside,7 aside,8 aside,11 aside", FeatureAvailable: true},
+		{Name: "basketball", GameModes: "1 on 1, 3 on 3, 5 on 5", FeatureAvailable: false},
+		{Name: "tennis", GameModes: "", FeatureAvailable: false},
+		{Name: "american_football", GameModes: "", FeatureAvailable: false},
 	}
 
 	for _, sport := range sportsData {
-		_, err := db.GetDB().Query(queries.InsertIntoSport, sport.Name, sport.FeatureAvailable)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	gameModesData := []data.GameMode{
-		{Name: "1v1"},
-		{Name: "5v5"},
-		{Name: "7v7"},
-		{Name: "8v8"},
-		{Name: "11v11"},
-	}
-
-	for _, gameMode := range gameModesData {
-		_, err := db.GetDB().Query("INSERT INTO game_modes (name) VALUES (?)", gameMode.Name)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	sportGameModesData := []struct {
-		GameModeID uint64
-		SportID    uint64
-	}{
-		{GameModeID: 1, SportID: 1}, // soccer
-		{GameModeID: 2, SportID: 1}, // soccer
-		{GameModeID: 3, SportID: 1}, // soccer
-		{GameModeID: 4, SportID: 1}, // soccer
-
-		{GameModeID: 1, SportID: 2}, // bball
-		{GameModeID: 2, SportID: 2}, // bball
-	}
-
-	for _, sportGameMode := range sportGameModesData {
-		_, err := db.GetDB().Query("INSERT INTO sport_game_modes (game_mode_id, sport_id) VALUES (?, ?)", sportGameMode.GameModeID, sportGameMode.SportID)
+		_, err := db.GetDB().Query(queries.InsertIntoSport, sport.Name, sport.GameModes, sport.FeatureAvailable)
 		if err != nil {
 			panic(err)
 		}
@@ -192,27 +155,30 @@ func PopulateTables() {
 	}
 
 	activitiesData := []data.Activity{
-		{Address: "123 rue du 33", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 11, Price: 0, Rules: "No tackles", OrganizerID: 1, Time: time.Now().Format("15:04:05"), Title: "Activity A", SportID: 1},
-		{Address: "123 rue du 34", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 22, Price: 5, Rules: "No tackles", OrganizerID: 2, Time: time.Now().Format("15:04:05"), Title: "Activity B", SportID: 1},
-		{Address: "123 rue du 35", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 22, Price: 10, Rules: "No tackles", OrganizerID: 3, Time: time.Now().Format("15:04:05"), Title: "Activity C", SportID: 1},
-		{Address: "123 rue du 36", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 22, Price: 0, Rules: "No tackles", OrganizerID: 4, Time: time.Now().Format("15:04:05"), Title: "Activity D", SportID: 1},
-		{Address: "123 rue du 37", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 22, Price: 0, Rules: "No tackles", OrganizerID: 5, Time: time.Now().Format("15:04:05"), Title: "Activity E", SportID: 1},
-		{Address: "123 rue du 38", Date: time.Now().Format("2006-01-02"), Description: "unknown description", IsPrivate: false, MaxPlayers: 22, Price: 0, Rules: "No tackles", OrganizerID: 1, Time: time.Now().Format("15:04:05"), Title: "Activity F", SportID: 1},
+		{Address: "123 rue du 33", Date: time.Now().Format("2006-01-02"), Description: "unknown description", GameMode: "5 aside", IsPrivate: false, Lat: 9.19756, Lng: 29.67629, MaxPlayers: 11, Price: 0, Rules: "No tackles", OrganizerID: 1, Time: time.Now().Format("15:04:05"), Title: "Activity A", SportID: 1},
+		{Address: "123 rue du 33", Date: time.Now().Format("2006-01-02"), Description: "unknown description", GameMode: "5 aside", IsPrivate: false, Lat: 10.92810, Lng: -8.07624, MaxPlayers: 11, Price: 0, Rules: "No tackles", OrganizerID: 1, Time: time.Now().Format("15:04:05"), Title: "Activity A", SportID: 1},
+		{Address: "123 rue du 33", Date: time.Now().Format("2006-01-02"), Description: "unknown description", GameMode: "5 aside", IsPrivate: false, Lat: 4.70038, Lng: -77.28465, MaxPlayers: 11, Price: 0, Rules: "No tackles", OrganizerID: 1, Time: time.Now().Format("15:04:05"), Title: "Activity A", SportID: 1},
+		{Address: "123 rue du 33", Date: time.Now().Format("2006-01-02"), Description: "unknown description", GameMode: "5 aside", IsPrivate: false, Lat: 19.64322, Lng: -89.74694, MaxPlayers: 11, Price: 0, Rules: "No tackles", OrganizerID: 1, Time: time.Now().Format("15:04:05"), Title: "Activity A", SportID: 1},
+		{Address: "123 rue du 33", Date: time.Now().Format("2006-01-02"), Description: "unknown description", GameMode: "5 aside", IsPrivate: false, Lat: -8.90166, Lng: -74.75712, MaxPlayers: 11, Price: 0, Rules: "No tackles", OrganizerID: 1, Time: time.Now().Format("15:04:05"), Title: "Activity A", SportID: 1},
 	}
 
 	for _, activity := range activitiesData {
-		_, err := db.GetDB().Query(queries.InsertActivity,
+		_, err := db.GetDB().Exec(queries.InsertActivity,
 			activity.Address,
 			activity.Date,
 			activity.Description,
+			activity.GameMode,
+			activity.Images,
 			activity.IsPrivate,
+			activity.Lat,
+			activity.Lng,
 			activity.MaxPlayers,
+			activity.OrganizerID,
 			activity.Price,
 			activity.Rules,
-			activity.OrganizerID,
+			activity.SportID,
 			activity.Time,
 			activity.Title,
-			activity.SportID,
 		)
 		if err != nil {
 			panic(err)

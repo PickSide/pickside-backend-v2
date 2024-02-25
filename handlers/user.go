@@ -17,6 +17,18 @@ import (
 	"github.com/google/uuid"
 )
 
+func HandleGetAllUsers(g *gin.Context) {
+	results, err := data.AllUsers()
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	g.JSON(http.StatusOK, gin.H{
+		"results": results,
+	})
+}
+
 type CreateUserRequest struct {
 	AgreedToTerms bool   `json:"agreedToTerms" binding:"required"`
 	Email         string `json:"email" binding:"required" validate:"required,email"`

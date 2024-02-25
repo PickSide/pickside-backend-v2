@@ -1,8 +1,7 @@
 package queries
 
-const DropActivities = "DROP TABLE IF EXISTS activity;"
+const DropActivities = "DROP TABLE IF EXISTS activities;"
 const DropChatrooms = "DROP TABLE IF EXISTS chatrooms;"
-const DropGameModes = "DROP TABLE IF EXISTS game_modes;"
 const DropGroups = "DROP TABLE IF EXISTS groups;"
 const DropLocales = "DROP TABLE IF EXISTS locales;"
 const DropMessage = "DROP TABLE IF EXISTS messages;"
@@ -12,5 +11,4 @@ const DropTokens = "DROP TABLE IF EXISTS tokens;"
 const DropUsers = "DROP TABLE IF EXISTS users;"
 const DropActivityUsers = "DROP TABLE IF EXISTS activity_users;"
 const DropChatroomUsers = "DROP TABLE IF EXISTS chatroom_users;"
-const DropGroupUsers = "DROP TABLE IF EXISTS group_users;"
-const DropSportGameModes = "DROP TABLE IF EXISTS sport_game_modes;"
+const DropGroupUsers = "DROP TABLE IF EXISTS users_groups;"

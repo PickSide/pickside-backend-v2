@@ -6,16 +6,20 @@ const CreateActivityTable = `
         address VARCHAR(255),
         date DATE,
         description VARCHAR(255),
+        game_mode VARCHAR(255),
+        images VARCHAR(255) NULL,
         is_private BOOL,
+        lat DECIMAL(10, 8) NULL,
+        lng DECIMAL(11, 8) NULL,
         max_players INT,
+        organizer_id BIGINT UNSIGNED,
         price FLOAT,
         rules VARCHAR(255),
+        sport_id BIGINT UNSIGNED,
         time VARCHAR(255),
         title VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        organizer_id BIGINT UNSIGNED,
-        sport_id BIGINT UNSIGNED,
         INDEX organizer_id_idx (organizer_id),
         INDEX sport_id_idx (sport_id)
     );
@@ -31,24 +35,17 @@ const CreateChatroomTable = `
         INDEX last_message_id_idx (last_message_id)
     )
 `
-const CreateGameModesTable = `
-    CREATE TABLE IF NOT EXISTS game_modes (
-        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL
-    );
-`
 const CreateGroupTable = `
     CREATE TABLE IF NOT EXISTS groups (
         id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        cover_photo VARCHAR(255),
         description VARCHAR(255),
         name VARCHAR(255),
+        organizer_id BIGINT UNSIGNED,
         requires_approval BOOL,
+        sport_id BIGINT UNSIGNED,
         visibility ENUM('public', 'private'),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        organizer_id BIGINT UNSIGNED,
-        sport_id BIGINT UNSIGNED,
         INDEX organizer_id_idx (organizer_id),
         INDEX sport_id_idx (sport_id)
     )
@@ -90,6 +87,7 @@ const CreateSportTable = `
     CREATE TABLE IF NOT EXISTS sports (
         id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255),
+        game_modes VARCHAR(255),
         feature_available BOOL
     )
 `
@@ -164,20 +162,11 @@ const CreateChatroomParticipantsTable = `
     )
 `
 const CreateGroupUsersTable = `
-    CREATE TABLE IF NOT EXISTS group_users (
+    CREATE TABLE IF NOT EXISTS users_groups (
         group_id BIGINT UNSIGNED,
         user_id BIGINT UNSIGNED,
         PRIMARY KEY (group_id, user_id),
         INDEX group_id_idx (group_id),
         INDEX user_id_idx (user_id)
     )
-`
-const CreateSportGameModesTable = `
-    CREATE TABLE IF NOT EXISTS sport_game_modes (
-        game_mode_id BIGINT UNSIGNED,
-        sport_id BIGINT UNSIGNED,
-        PRIMARY KEY (sport_id, game_mode_id),
-        INDEX sport_id_idx (sport_id),
-        INDEX game_mode_id_idx (game_mode_id)
-    );
 `

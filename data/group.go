@@ -8,13 +8,12 @@ import (
 
 type Group struct {
 	ID               uint64 `json:"id"`
-	CoverPhoto       string `json:"coverPhoto"`
 	Description      string `json:"description"`
 	Name             string `json:"name"`
 	RequiresApproval bool   `json:"requiresApproval"`
 	Visibility       string `json:"visibility"`
-	CreatedAt        string `json:"createdAt"`
-	UpdatedAt        string `json:"updatedAt"`
+	CreatedAt        string `json:"createdAt,omitempty"`
+	UpdatedAt        string `json:"updatedAt,omitempty"`
 	OrganizerID      uint64 `json:"organizerId"`
 	SportID          uint64 `json:"sportId"`
 }
@@ -24,11 +23,15 @@ type GroupUser struct {
 	UserID  uint64
 }
 
-func AllGroupsByOrganizer(organizerID uint64) (*[]Group, error) {
+func AllGroupsByOrganizer(organizerId uint64) (*[]Group, error) {
 	dbInstance := db.GetDB()
 
-	// Fetch all groups directly using JOIN
-	rows, err := dbInstance.Query(queries.SelectAllGroupsByOrganizer, organizerID)
+	rows, err := dbInstance.Query(
+		`
+			SELECT id, description, name, organizer_id, requires_approval, sport_id, visibility 
+			FROM groups 
+			WHERE organizer_id = ?
+		`, organizerId)
 	if err != nil {
 		return nil, err
 	}
@@ -41,15 +44,12 @@ func AllGroupsByOrganizer(organizerID uint64) (*[]Group, error) {
 
 		err := rows.Scan(
 			&group.ID,
-			&group.CoverPhoto,
 			&group.Description,
 			&group.Name,
-			&group.RequiresApproval,
-			&group.Visibility,
-			&group.CreatedAt,
-			&group.UpdatedAt,
 			&group.OrganizerID,
+			&group.RequiresApproval,
 			&group.SportID,
+			&group.Visibility,
 		)
 		if err != nil {
 			return nil, err
@@ -65,7 +65,7 @@ func AllGroupsByOrganizer(organizerID uint64) (*[]Group, error) {
 	return &groups, nil
 }
 
-func InsertGroup(coverPhoto string, description string, name string, requiresApproval bool, visibility string, organizerId uint64, sportId uint64) (*Group, error) {
+func InsertGroup(group Group) (*Group, error) {
 	dbInstance := db.GetDB()
 
 	tx, err := dbInstance.Begin()
@@ -81,14 +81,23 @@ func InsertGroup(coverPhoto string, description string, name string, requiresApp
 	}()
 
 	result, err := tx.Exec(
-		queries.InsertIntoGroup,
-		coverPhoto,
-		description,
-		name,
-		requiresApproval,
-		visibility,
-		organizerId,
-		sportId,
+		`
+			INSERT INTO groups (
+				description, 
+				name, 
+				organizer_id, 
+				requires_approval, 
+				sport_id,
+				visibility 
+			)
+			VALUES (?, ?, ?, ?, ?, ?)
+		`,
+		group.Description,
+		group.Name,
+		group.OrganizerID,
+		group.RequiresApproval,
+		group.SportID,
+		group.Visibility,
 	)
 	if err != nil {
 		return nil, err
@@ -102,25 +111,21 @@ func InsertGroup(coverPhoto string, description string, name string, requiresApp
 	var insertedGroup Group
 
 	err = tx.QueryRow(
-		queries.SelectGroupById,
+		` 
+			SELECT id, description, name, organizer_id, requires_approval, sport_id, visibility
+    		FROM groups
+    		WHERE id = ?
+		`,
 		lastInsertID,
 	).Scan(
 		&insertedGroup.ID,
-		&insertedGroup.CoverPhoto,
 		&insertedGroup.Description,
 		&insertedGroup.Name,
-		&insertedGroup.RequiresApproval,
-		&insertedGroup.Visibility,
-		&insertedGroup.CreatedAt,
-		&insertedGroup.UpdatedAt,
 		&insertedGroup.OrganizerID,
+		&insertedGroup.RequiresApproval,
 		&insertedGroup.SportID,
+		&insertedGroup.Visibility,
 	)
-	if err != nil {
-		return nil, err
-	}
-
-	err = InsertGroupUsers(tx, insertedGroup.ID, insertedGroup.OrganizerID)
 	if err != nil {
 		return nil, err
 	}
@@ -128,11 +133,81 @@ func InsertGroup(coverPhoto string, description string, name string, requiresApp
 	return &insertedGroup, nil
 }
 
-func InsertGroupUsers(tx *sql.Tx, groupId uint64, userId uint64) error {
-	_, err := tx.Exec(queries.InsertIntoGroupUsers,
+func InsertGroupUsers(groupId uint64, userId uint64) error {
+	dbInstance := db.GetDB()
+
+	tx, err := dbInstance.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+			return
+		}
+		_ = tx.Commit()
+	}()
+
+	_, err = tx.Exec(queries.InsertIntoGroupUsers,
 		groupId,
 		userId,
 	)
+	if err != nil {
+		return err
+	}
 
 	return err
+}
+
+func DeleteGroup(groupId uint64, organizerId uint64) (*sql.Result, error) {
+	dbInstance := db.GetDB()
+
+	tx, err := dbInstance.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+			return
+		}
+		_ = tx.Commit()
+	}()
+
+	_, err = tx.Exec("DELETE FROM users_groups WHERE group_id = ?", groupId)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	results, err := tx.Exec("DELETE FROM groups WHERE id = ?", groupId)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	return &results, nil
+}
+
+func DeleteUsersGroups(groupId uint64, user_id uint64) (*sql.Result, error) {
+	dbInstance := db.GetDB()
+
+	tx, err := dbInstance.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+			return
+		}
+		_ = tx.Commit()
+	}()
+
+	result, err := tx.Exec(`DELETE FROM groups_users WHERE group_id = ? AND organizer_id = ?`,
+		groupId,
+		user_id,
+	)
+
+	return &result, err
 }
