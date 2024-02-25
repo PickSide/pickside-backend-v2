@@ -286,7 +286,7 @@ func getUserDetails(dbInstance *sql.DB, queryBy string, value any) (*User, error
 func getUserFavorites(dbInstance *sql.DB, userId uint64) ([]string, error) {
 	var favorites *string
 
-	err := dbInstance.QueryRow(queries.SelectFavorites, userId).Scan(&favorites)
+	err := dbInstance.QueryRow(`SELECT favorites FROM users WHERE id = ?`, userId).Scan(&favorites)
 	if err != nil {
 		return nil, err
 	}

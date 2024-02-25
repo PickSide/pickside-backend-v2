@@ -142,7 +142,7 @@ func CreateActivity(address string, date string, description string, gameMode st
 }
 
 func getAllActivities(dbInstance *sql.DB) (*[]Activity, error) {
-	rows, err := dbInstance.Query(queries.SelectAllActivities)
+	rows, err := dbInstance.Query(`SELECT * FROM activities`)
 	if err != nil {
 		return nil, err
 	}
@@ -186,12 +186,12 @@ func getAllActivities(dbInstance *sql.DB) (*[]Activity, error) {
 func getActivityById(dbInstance *sql.DB, activityId string) (*Activity, error) {
 	var activity Activity
 
-	err := dbInstance.QueryRow(queries.SelectActivityById, activityId).Scan(
+	err := dbInstance.QueryRow(`SELECT * FROM activities WHERE id = ?`, activityId).Scan(
+		&activity.ID,
 		&activity.Address,
 		&activity.Date,
 		&activity.Description,
 		&activity.GameMode,
-		&activity.ID,
 		&activity.Images,
 		&activity.IsPrivate,
 		&activity.Lat,
@@ -203,6 +203,8 @@ func getActivityById(dbInstance *sql.DB, activityId string) (*Activity, error) {
 		&activity.SportID,
 		&activity.Time,
 		&activity.Title,
+		&activity.CreatedAt,
+		&activity.UpdatedAt,
 	)
 
 	return &activity, err

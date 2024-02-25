@@ -227,11 +227,9 @@ func HandleLogout(g *gin.Context) {
 }
 
 func HandleGetFavorites(g *gin.Context) {
-	userIdString := g.Params.ByName("activityId")
-
-	userId, err := strconv.ParseUint(userIdString, 10, 64)
+	userId, err := strconv.ParseUint(g.Params.ByName("userId"), 10, 64)
 	if err != nil {
-		g.JSON(http.StatusNotFound, err.Error())
+		g.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
