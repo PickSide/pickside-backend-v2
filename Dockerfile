@@ -2,16 +2,14 @@
 
 FROM golang:1.21.6
 
-WORKDIR /me-service
-
-COPY go.mod go.sum ./
-RUN go mod download
+WORKDIR /app
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping
+RUN go mod download
+
+RUN go build -o ./bin/pickside-service cmd/api/main.go
 
 EXPOSE 8080
 
-# Run
-CMD ["/docker-gs-ping"]
+CMD [ "./bin/pickside-service" ]
