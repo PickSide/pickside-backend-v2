@@ -30,34 +30,7 @@ func main() {
 		}
 	}()
 
-	CreateTables()
 	PopulateTables()
-}
-
-func CreateTables() {
-	log.Println("Creating tables...")
-
-	qs := []string{
-		queries.CreateActivityTable,
-		queries.CreateActivityUserTable,
-		queries.CreateChatroomParticipantsTable,
-		queries.CreateChatroomTable,
-		queries.CreateGroupUsersTable,
-		queries.CreateGroupTable,
-		queries.CreateLocaleTable,
-		queries.CreateMessageTable,
-		queries.CreateNotificationTable,
-		queries.CreateSportTable,
-		queries.CreateTokensTable,
-		queries.CreateUserTables,
-	}
-
-	for _, q := range qs {
-		_, err := db.GetDB().Exec(q)
-		if err != nil {
-			panic(err)
-		}
-	}
 }
 
 func PopulateTables() {
