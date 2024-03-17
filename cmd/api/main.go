@@ -25,7 +25,7 @@ func main() {
 	}
 
 	g.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://127.0.0.1:3000", "http://localhost:3000", "https://pickside.net"},
+		AllowOrigins:     []string{"http://127.0.0.1:3000", "http://localhost:3000", "https://pickside.net", "https://pickside.net/"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowHeaders:     []string{"Origin", "X-Request-Id", "Content-Type"},
 		AllowWebSockets:  true,
