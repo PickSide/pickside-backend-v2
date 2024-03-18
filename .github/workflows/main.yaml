@@ -28,5 +28,5 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           script: |
-            chmod +x /tmp/deploy.sh
-            /tmp/deploy.sh
+            sudo chmod +x /tmp/deploy.sh
+            sudo /tmp/deploy.sh
