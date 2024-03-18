@@ -22,7 +22,7 @@ func OpenConnectionToDB() error {
 	}
 
 	once.Do(func() {
-		db, err = sql.Open("mysql", os.Getenv("DSN_DEV"))
+		db, err = sql.Open("mysql", os.Getenv("DSN"))
 		if err != nil {
 			panic(err)
 		}
