@@ -1,19 +1,20 @@
 #bin/bash
 
+REPO_DIR="/home/ubuntu/dev/pickside-backend-v2"
+
 cd /home/ubuntu/dev/
 
-if [ ! -d "pickside-backend-v2" ]; then
+if [ ! -d "$REPO_DIR" ]; then
     git clone https://github.com/PickSide/pickside-backend-v2.git
 fi
 
-git config --global --add safe.directory /home/ubuntu/dev/pickside-backend-v2
+cd $REPO_DIR
 
-cd pickside-backend-v2
+git config --global --add safe.directory $REPO_DIR
 
-git checkout release
+git checkout release || exit 1
+git pull origin release || exit 1
 
-git pull origin release
-
-docker-compose down
-docker-compose pull
-docker-compose up -d
+docker-compose down || exit 1
+docker-compose pull || exit 1
+docker-compose up -d || exit 1
