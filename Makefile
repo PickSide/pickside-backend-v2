@@ -8,9 +8,9 @@ build:
 	@go build -o ./bin/pickside-service cmd/api/main.go
 
 up:
-	migrate -path db/migrations/ -database "mysql://$(DSN_DEV)" -verbose up
+	migrate -path db/migrations/ -database "mysql://$(DSN)" -verbose up
 down:
-	@migrate -path db/migrations/ -database "mysql://$(DSN_DEV)" -verbose down
+	@migrate -path db/migrations/ -database "mysql://$(DSN)" -verbose down
 
 migration:
 	@migrate create -ext sql -dir cmd/db/migrations $(filter-out $@,$(MAKECMDGOALS))
