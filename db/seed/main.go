@@ -100,9 +100,9 @@ func PopulateTables() {
 			Permissions:           strings.Join(types.DEFAULT_PERMISSIONS[:], ","),
 			Phone:                 "514-123-45679",
 			PreferredLocale:       "en",
-			PreferredRegion:       "soccer",
-			PreferredSport:        "light",
-			PreferredTheme:        "montreal",
+			PreferredRegion:       "montreal",
+			PreferredSport:        "soccer",
+			PreferredTheme:        "light",
 			Reliability:           50,
 			Role:                  types.USER,
 			Sexe:                  types.MALE,
@@ -116,7 +116,13 @@ func PopulateTables() {
 	}
 
 	for _, user := range users {
-		_, err := db.GetDB().Exec(queries.InsertUserSeed,
+		_, err := db.GetDB().Exec(
+			`INSERT INTO users (
+				account_type, agreed_to_terms, allow_location_tracking, avatar, bio, city, email, email_verified, external_id, favorites,
+				full_name, inactive_date, is_inactive, join_date, locale_region, match_organized_count, match_played_count,
+				password, permissions, phone, preferred_locale, preferred_region, preferred_sport, preferred_theme,
+				reliability, role, sexe, show_age, show_email, show_groups, show_phone, timezone, username
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			user.AccountType, true, user.AllowLocationTracking, user.Avatar, user.Bio, user.City, user.Email, user.EmailVerified, user.ExternalID, user.Favorites,
 			user.FullName, user.InactiveDate, user.IsInactive, user.JoinDate, user.LocaleRegion, user.MatchOrganizedCount, user.MatchPlayedCount,
 			user.Password, user.Permissions, user.Phone, user.PreferredLocale, user.PreferredRegion, user.PreferredSport, user.PreferredTheme,

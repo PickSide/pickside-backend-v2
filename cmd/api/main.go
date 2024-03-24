@@ -63,7 +63,7 @@ func main() {
 	v2.GET("/users", middlewares.WithToken(), handlers.HandleGetAllUsers)
 	v2.GET("/users/:userId/activities/favorites", middlewares.WithToken(), handlers.HandleGetFavorites)
 	v2.POST("/users", handlers.HandleCreateUser)
-	v2.PUT("/users/:userId/settings", middlewares.WithToken(), handlers.HandleUpdateSettings)
+	v2.PUT("/users/:userId/settings", middlewares.WithToken(), handlers.HandleUpdateUser)
 	v2.PUT("/users/:userId/activities/:activityId/favorites", middlewares.WithToken(), handlers.HandleUpdateFavorites)
 
 	err := g.Run(os.Getenv("LISTEN_PORT"))

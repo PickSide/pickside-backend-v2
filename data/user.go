@@ -348,7 +348,6 @@ type CreateUserStruct struct {
 	EmailVerified bool
 	ExternalID    string
 	FullName      string
-	Locale        string
 	Password      []byte
 	Phone         string
 	Picture       string
@@ -368,9 +367,11 @@ func createUser(dbInstance *sql.DB, fields CreateUserStruct) (*User, error) {
 				password, 
 				permissions, 
 				phone, 
+				preferred_local,
+				preferred_theme,
 				role, 
 				username
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		`,
 		fields.AccountType,
 		fields.AgreedToTerms,
@@ -382,6 +383,8 @@ func createUser(dbInstance *sql.DB, fields CreateUserStruct) (*User, error) {
 		fields.Password,
 		strings.Join(types.DEFAULT_PERMISSIONS[:], ","),
 		fields.Phone,
+		"en",    //preferred locale
+		"light", //preferred theme
 		types.USER,
 		fields.Username,
 	)

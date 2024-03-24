@@ -1,16 +1,26 @@
 include .env
 export
 
-run: build
+run:
 	@./bin/pickside-service
 
-build:
+run_is: build_is
+	@./bin/image-service
+	
+build: build_api build_is
+
+build_api:
+	@echo "Building API service..."
 	@go build -o ./bin/pickside-service cmd/api/main.go
+
+build_is:
+	@echo "Building Upload service..."
+	@go build -o ./bin/image-service cmd/image-service/main.go
 
 up:
 	migrate -path db/migrations/ -database "mysql://$(DSN)" -verbose up
 down:
-	@migrate -path db/migrations/ -database "mysql://$(DSN)" -verbose down
+	migrate -path db/migrations/ -database "mysql://$(DSN)" -verbose down
 
 migration:
 	@migrate create -ext sql -dir cmd/db/migrations $(filter-out $@,$(MAKECMDGOALS))

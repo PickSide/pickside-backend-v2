@@ -73,7 +73,6 @@ func HandleCreateUser(g *gin.Context) {
 		AgreedToTerms: true,
 		Email:         req.Email,
 		FullName:      req.FullName,
-		Locale:        "en",
 		Password:      []byte(req.Password),
 		Phone:         req.Phone,
 	}
@@ -180,7 +179,6 @@ func HandleLoginWithGoogle(g *gin.Context) {
 			EmailVerified: req.VerifiedEmail,
 			ExternalID:    req.GoogleID,
 			FullName:      req.Name,
-			Locale:        req.Locale,
 			Picture:       req.Picture,
 		})
 	}
@@ -272,7 +270,7 @@ func HandleUpdateFavorites(g *gin.Context) {
 	return
 }
 
-func HandleUpdateSettings(g *gin.Context) {
+func HandleUpdateUser(g *gin.Context) {
 	userIdString := g.Params.ByName("userId")
 
 	userId, err := strconv.ParseUint(userIdString, 10, 64)
@@ -294,8 +292,11 @@ func HandleUpdateSettings(g *gin.Context) {
 		return
 	}
 
+	log.Println("settings", settings)
+
 	g.JSON(http.StatusOK, gin.H{
 		"message": "succesfully updated",
+		"result":  settings,
 	})
 	return
 }
