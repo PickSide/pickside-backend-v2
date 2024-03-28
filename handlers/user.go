@@ -169,8 +169,6 @@ func HandleLoginWithGoogle(g *gin.Context) {
 		return
 	}
 
-	log.Println("GoogleID", req.GoogleID)
-
 	user, err := data.MatchExternalId(req.GoogleID)
 	if err != nil && err == sql.ErrNoRows {
 		user, err = data.NewUser(data.CreateUserStruct{

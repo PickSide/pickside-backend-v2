@@ -6,7 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var allowedDomains = []string{"localhost:8080", "127.0.0.1:8080", "pickside-service.com"}
+var allowedDomains = []string{
+	"localhost:8080",
+	"127.0.0.1:8080",
+	"localhost:8081",
+	"127.0.0.1:8081",
+	"localhost:8082",
+	"127.0.0.1:8082",
+	"localhost:8084",
+	"127.0.0.1:8084",
+	"pickside-service.com",
+}
 
 func FromValidDomain() gin.HandlerFunc {
 	return func(g *gin.Context) {

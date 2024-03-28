@@ -3,9 +3,7 @@ package util
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"errors"
 	"math/big"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -62,20 +60,13 @@ func ConvertUint64ToStringsArray(arr []uint64) []string {
 	return strArr
 }
 
-func ArrayIncludes(array []interface{}, value interface{}) (bool, error) {
-	arrType := reflect.TypeOf(array)
-
-	if arrType.Elem() != reflect.TypeOf(value) {
-		return false, errors.New("wrong element type provided")
-	}
-
-	for _, unit := range array {
-		if unit == value {
-			return true, nil
+func Contains(slice []string, value string) bool {
+	for _, item := range slice {
+		if item == value {
+			return true
 		}
 	}
-
-	return false, nil
+	return false
 }
 
 func Uint64Includes(unint64Array []uint64, value uint64) bool {

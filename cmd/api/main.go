@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"pickside/service/db"
@@ -18,21 +19,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	g := gin.Default()
-
 	if err := db.OpenConnectionToDB(); err != nil {
 		log.Fatal(err)
 	}
 
-	g.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://127.0.0.1:3000", "http://localhost:3000", "https://pickside.net", "https://pickside.net/"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
-		AllowHeaders:     []string{"Origin", "X-Request-Id", "Content-Type"},
-		AllowWebSockets:  true,
-		ExposeHeaders:    []string{"X-Request-Id", "Content-Type", "Content-Length", "Content-Encoding"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
+	g := gin.Default()
+	g.Use(cors.New(buildCors()))
 
 	v2 := g.Group("/api/v2", middlewares.FromValidDomain())
 
@@ -66,9 +58,19 @@ func main() {
 	v2.PUT("/users/:userId/settings", middlewares.WithToken(), handlers.HandleUpdateUser)
 	v2.PUT("/users/:userId/activities/:activityId/favorites", middlewares.WithToken(), handlers.HandleUpdateFavorites)
 
-	err := g.Run(os.Getenv("LISTEN_PORT"))
-
-	if err != nil {
-		log.Fatal(err)
+	if err := g.Run(fmt.Sprintf(":%s", os.Getenv("API_PORT"))); err != nil {
+		log.Fatalf("Failed to run server: %v", err)
 	}
+}
+
+func buildCors() cors.Config {
+	c := cors.DefaultConfig()
+	c.AllowOrigins = []string{"http://127.0.0.1:3000", "http://localhost:3000", "https://pickside.net"}
+	c.AllowMethods = []string{"GET", "POST", "PUT", "DELETE"}
+	c.AllowHeaders = []string{"Origin", "X-Request-Id", "Content-Type"}
+	c.AllowWebSockets = false
+	c.AllowCredentials = true
+	c.MaxAge = 12 * time.Hour
+
+	return c
 }

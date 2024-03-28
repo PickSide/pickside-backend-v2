@@ -142,7 +142,12 @@ func PopulateTables() {
 	}
 
 	for _, activity := range activitiesData {
-		_, err := db.GetDB().Exec(queries.InsertActivity,
+		_, err := db.GetDB().Exec(
+			`INSERT INTO activities (
+				address, date, description, game_mode, images, is_private, lat, 
+				lng, max_players, organizer_id, price, rules, sport_id, time, title
+			)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			activity.Address,
 			activity.Date,
 			activity.Description,
@@ -158,6 +163,44 @@ func PopulateTables() {
 			activity.SportID,
 			activity.Time,
 			activity.Title,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	notificationsData := []data.Notification{
+		{Content: "this is a notification", Recipient: 1, Title: "notification"},
+		{Content: "this is a notification", Recipient: 1, Title: "notification"},
+		{Content: "this is a notification", Recipient: 2, Title: "notification"},
+		{Content: "this is a notification", Recipient: 2, Title: "notification"},
+	}
+
+	for _, notification := range notificationsData {
+		_, err := db.GetDB().Exec(`INSERT INTO notifications (expires, is_read, content, recipient_id, title) VALUES (?, ?, ?, ?, ?)`,
+			time.Now().AddDate(0, 0, 1),
+			0,
+			notification.Content,
+			notification.Recipient,
+			notification.Title,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	globalNotificationsData := []data.Notification{
+		{Content: "this is a global notification", Title: "global notification"},
+		{Content: "this is a global notification", Title: "global notification"},
+		{Content: "this is a global notification", Title: "global notification"},
+		{Content: "this is a global notification", Title: "global notification"},
+	}
+
+	for _, globalNotification := range globalNotificationsData {
+		_, err := db.GetDB().Exec(`INSERT INTO global_notifications (expires, content, title) VALUES (?, ?, ?)`,
+			time.Now().AddDate(0, 0, 1),
+			globalNotification.Content,
+			globalNotification.Title,
 		)
 		if err != nil {
 			panic(err)

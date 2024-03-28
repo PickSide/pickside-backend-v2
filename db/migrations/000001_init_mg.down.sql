@@ -10,6 +10,8 @@ DROP TABLE IF EXISTS messages;
 
 DROP TABLE IF EXISTS notifications;
 
+DROP TABLE IF EXISTS global_notifications;
+
 DROP TABLE IF EXISTS sports;
 
 DROP TABLE IF EXISTS users;

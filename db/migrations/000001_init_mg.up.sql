@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS activities (
     description VARCHAR(255),
     game_mode VARCHAR(255),
     images VARCHAR(255) NULL,
-    is_private BOOL,
+    is_private BOOLEAN,
     lat DECIMAL(10, 8) NULL,
     lng DECIMAL(11, 8) NULL,
     max_players INT,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS groups (
     description VARCHAR(255),
     name VARCHAR(255),
     organizer_id BIGINT UNSIGNED,
-    requires_approval BOOL,
+    requires_approval BOOLEAN,
     sport_id BIGINT UNSIGNED,
     visibility ENUM('public', 'private'),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS locales (
 CREATE TABLE IF NOT EXISTS messages (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     content TEXT,
-    delivered BOOL,
+    delivered BOOLEAN,
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     chatroom_id BIGINT UNSIGNED,
     sender_id BIGINT UNSIGNED,
@@ -66,33 +66,31 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE TABLE IF NOT EXISTS notifications (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     expires DATETIME,
-    is_read BOOL,
-    message VARCHAR(255),
-    receiver_id BIGINT UNSIGNED,
-    sender_id BIGINT UNSIGNED,
-    type ENUM(
-        'system',
-        'global',
-        'like',
-        'group-invite',
-        'message-reminder',
-        'friend-invite'
-    ),
-    INDEX receiver_id_idx (receiver_id),
-    INDEX sender_id_idx (sender_id)
+    is_read BOOLEAN DEFAULT 0,
+    content VARCHAR(255),
+    recipient_id BIGINT UNSIGNED,
+    title VARCHAR(255),
+    INDEX recipient_id_idx (recipient_id)
+);
+
+CREATE TABLE IF NOT EXISTS global_notifications (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    expires DATETIME,
+    content VARCHAR(255),
+    title VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS sports (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255),
     game_modes VARCHAR(255),
-    feature_available BOOL
+    feature_available BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS tokens (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     value VARCHAR(255),
-    is_black_listed BOOL,
+    is_black_listed BOOLEAN,
     associated_user_id BIGINT,
     INDEX associated_user_id_idx (associated_user_id)
 );
@@ -110,11 +108,11 @@ CREATE TABLE IF NOT EXISTS users (
     bio VARCHAR(255) DEFAULT '',
     city VARCHAR(255) DEFAULT '',
     email VARCHAR(255) NOT NULL,
-    email_verified BOOL,
+    email_verified BOOLEAN,
     external_id VARCHAR(255) NULL,
     full_name VARCHAR(255) DEFAULT '',
     favorites VARCHAR(255) DEFAULT '',
-    is_inactive BOOL DEFAULT 0,
+    is_inactive BOOLEAN DEFAULT 0,
     inactive_date TIMESTAMP,
     join_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     locale_region VARCHAR(255),
@@ -128,17 +126,16 @@ CREATE TABLE IF NOT EXISTS users (
     sexe ENUM('male', 'female') DEFAULT 'male',
     timezone VARCHAR(255) DEFAULT '',
     username VARCHAR(255) NOT NULL,
-    agreed_to_terms BOOL DEFAULT 0,
-    allow_location_tracking BOOL DEFAULT 0,
+    agreed_to_terms BOOLEAN DEFAULT 0,
+    allow_location_tracking BOOLEAN DEFAULT 0,
     preferred_locale VARCHAR(255) DEFAULT '',
     preferred_region VARCHAR(255) DEFAULT '',
     preferred_sport VARCHAR(255) DEFAULT '',
     preferred_theme VARCHAR(255) DEFAULT '',
-    show_age BOOL DEFAULT 0,
-    show_email BOOL DEFAULT 0,
-    show_groups BOOL DEFAULT 0,
-    show_phone BOOL DEFAULT 0,
-    INDEX id_idx (id)
+    show_age BOOLEAN DEFAULT 0,
+    show_email BOOLEAN DEFAULT 0,
+    show_groups BOOLEAN DEFAULT 0,
+    show_phone BOOLEAN DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS activity_users (
@@ -154,7 +151,6 @@ CREATE TABLE IF NOT EXISTS chatroom_users (
     chatroom_id BIGINT UNSIGNED,
     user_id BIGINT UNSIGNED,
     PRIMARY KEY (chatroom_id, user_id),
-    INDEX chatroom_id_idx (chatroom_id),
     INDEX user_id_idx (user_id)
 );
 
@@ -162,6 +158,5 @@ CREATE TABLE IF NOT EXISTS users_groups (
     group_id BIGINT UNSIGNED,
     user_id BIGINT UNSIGNED,
     PRIMARY KEY (group_id, user_id),
-    INDEX group_id_idx (group_id),
     INDEX user_id_idx (user_id)
 );
